@@ -12,8 +12,8 @@ copy($MailMailerTable . ".static", $MailMailerTable . ".new");
 $mailerfile = fopen($MailMailerTable . ".new", "a");
 
 $domains = mysql_query ("SELECT Domains.ID, Domains.Name, DomainName, Mail, MailPrimary FROM Domains LEFT JOIN Users ON Users.ID = Domains.UserID WHERE Users.Enabled=1 AND Users.Hosting=1 AND Domains.Enabled=1 AND Mail <> 'none' AND MailServerID='" . mysql_escape_string($localserverid) . "' ORDER BY DomainName;", $link);
-for ($domainid = 0; $domainid < @mysql_num_rows($domains); $domainid++) {
-  $domain = @mysql_fetch_array($domains);
+for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
+  $domain = mysql_fetch_array($domains);
 
   if ($domain['Mail'] == "primary") {
     fputs($hostnamefile, $domain['DomainName'] . "\n");
@@ -21,8 +21,8 @@ for ($domainid = 0; $domainid < @mysql_num_rows($domains); $domainid++) {
     fputs($userfile, "\n");
 
     $aliases = mysql_query("SELECT Name, Type, Data FROM Aliases WHERE DomainID=" . mysql_escape_string($domain['ID']) . " ORDER BY Name;", $link);
-    for ($aliasid = 0; $aliasid < @mysql_num_rows($aliases); $aliasid++) {
-      $alias = @mysql_fetch_array($aliases);
+    for ($aliasid = 0; $aliasid < mysql_num_rows($aliases); $aliasid++) {
+      $alias = mysql_fetch_array($aliases);
       if ($alias['Type'] == "address") {
         fputs($aliasfile, $domain['Name']);
         if ($alias['Name'] != "") { fputs($aliasfile, "-" . $alias['Name']); }
@@ -64,15 +64,9 @@ fclose($relayfile);
 fclose($mailerfile);
 
 exec("diff --brief " . $MailVirtUserTable . ".new " . $MailVirtUserTable, $output, $changed);
-if ($changed == 0) {
-  exec("diff --brief " . $MailAliases . ".new " . $MailAliases, $output, $changed);
-  if ($changed == 0) {
-    exec("diff --brief " . $MailRelayDomains . ".new " . $MailRelayDomains, $output, $changed);
-    if ($changed == 0) {
-      exec("diff --brief " . $MailMailerTable . ".new " . $MailMailerTable, $output, $changed);
-    }
-  }
-}
+if ($changed == 0) { exec("diff --brief " . $MailAliases . ".new " . $MailAliases, $output, $changed); }
+if ($changed == 0) { exec("diff --brief " . $MailRelayDomains . ".new " . $MailRelayDomains, $output, $changed); }
+if ($changed == 0) { exec("diff --brief " . $MailMailerTable . ".new " . $MailMailerTable, $output, $changed); }
 
 if ($changed == 0) {
   unlink($MailVirtUserTable . ".new");
@@ -95,7 +89,7 @@ if ($changed == 0) {
 
   system("makemap -f hash " . $MailVirtUserTable . ".db < " . $MailVirtUserTable);
   system("makemap -f hash " . $MailMailerTable . ".db < " . $MailMailerTable);
-  system($PathSendmailInit . " restart >/dev/null");
   print "Restarting sendmail\n";
+  system($PathSendmailInit . " restart >/dev/null");
 }
 ?>

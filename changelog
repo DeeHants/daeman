@@ -1,3 +1,12 @@
+ * Moved the "restarting sendmail" line to before it restarts sendmail
+ * Changed the diff nesting in updatemail
+ * Removed the @ from most of the mysql functions as it is unnecassary
+ * Added fully qualified name to the Servers form
+ * Updated the schema
+ * Added a Servers.FullName field to contain the fully qualified server name
+ * Made the updatedns script put the correct IP address for the selected server
+01/03/2003
+
 X  0.03
  * Modified all the update scripts to only add the entries that apply to their local server
  * Modified all the update scripts to use a common MySQL database connection

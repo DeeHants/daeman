@@ -82,13 +82,16 @@ CREATE TABLE Hosts (
 CREATE TABLE Servers (
   ID int(10) unsigned NOT NULL auto_increment,
   Name varchar(255) NOT NULL default '',
+  FullName varchar(255) NOT NULL default '',
   Address varchar(15) NOT NULL default '',
   DNS tinyint(1) NOT NULL default '0',
   Mail tinyint(1) NOT NULL default '0',
   HTTP tinyint(1) NOT NULL default '0',
   DB tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (ID),
-  UNIQUE KEY Name (Name,Address)
+  UNIQUE KEY Address (Address),
+  UNIQUE KEY Name (Name),
+  UNIQUE KEY FullName (FullName)
 ) TYPE=MyISAM;
 # --------------------------------------------------------
 

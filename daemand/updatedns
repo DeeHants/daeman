@@ -3,8 +3,8 @@ copy($DNSConfig . ".static", $DNSConfig . ".new");
 $configfile = fopen($DNSConfig . ".new", "a");
 
 $domains = mysql_query("SELECT Domains.ID, Domains.Name, DomainName, DNS, DNSPrimary, DNSSerial FROM Domains LEFT JOIN Users ON Users.ID =Domains.UserID WHERE Users.Enabled=1 AND Users.Hosting=1 AND Domains.Enabled=1 AND DNS<>'none' AND DNSServerID='" . mysql_escape_string($localserverid) . "' ORDER BY DomainName;", $link);
-for ($domainid = 0; $domainid < @mysql_num_rows($domains); $domainid++) {
-  $domain = @mysql_fetch_array($domains);
+for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
+  $domain = mysql_fetch_array($domains);
 
   if ($domain['DNS'] == "primary") {
     fputs($configfile, "\n");
@@ -45,17 +45,24 @@ for ($domainid = 0; $domainid < @mysql_num_rows($domains); $domainid++) {
     
 
     $hosts = mysql_query("SELECT Name, Type, Data FROM Hosts WHERE DomainID='" . mysql_escape_string($domain['ID']) . "' ORDER BY Name;", $link);
-    for ($hostid = 0; $hostid < @mysql_num_rows($hosts); $hostid++) {
-      $host = @mysql_fetch_array($hosts);
+    for ($hostid = 0; $hostid < mysql_num_rows($hosts); $hostid++) {
+      $host = mysql_fetch_array($hosts);
       if ($host['Type'] == "a") {
         if ($host['Name'] == "") { fputs($zonefile, "@"); } else { fputs($zonefile, $host['Name']); }
         fputs($zonefile, "\tIN\tA\t" . $host['Data'] . "\n");
+
       } elseif ($host['Type'] == "cname") {
         if ($host['Name'] == "") { fputs($zonefile, "@"); } else { fputs($zonefile, $host['Name']); }
         fputs($zonefile, "\tIN\tCNAME\t" . $host['Data'] . "\n");
+
       } elseif ($host['Type'] == "website") {
-        if ($host['Name'] == "") { fputs($zonefile, "@"); } else { fputs($zonefile, $host['Name']); }
-        fputs($zonefile, "\tIN\tA\t217.204.224.131\n");
+        $websites = mysql_query("SELECT Websites.Name, Servers.Address FROM Websites LEFT JOIN Servers ON Websites.ServerID=Servers.ID WHERE Websites.ID='" . mysql_escape_string($host['Data']) . "';");
+        if (mysql_num_rows($websites) == 1) {
+          $website = mysql_fetch_array($websites);
+          if ($host['Name'] == "") { fputs($zonefile, "@"); } else { fputs($zonefile, $host['Name']); }
+          fputs($zonefile, "\tIN\tA\t" . $website['Address'] . "\n");
+        }
+        mysql_free_result($websites);
       }
 
     }
@@ -116,6 +123,7 @@ if ($changed == 0) {
 }
 
 function nextserial($serial) {
+  // Note: Tom found a problem here, Not sure of the details, changed 8 to 7
   $today = date("Ymd");
   if (substr($serial, 0, 8) == $today) {
     $serial = $today . str_pad(substr($serial, 8) + 1, 2, "0", STR_PAD_LEFT);
