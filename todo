@@ -1,0 +1,7 @@
+DaeManFE
+ * Disable forms for users that dont have hosted accounts
+ * Add server options for domains, mail, and websites
+ * Rename the config file/add a .htaccess to clock access
+
+DaeManD
+ * Make them honour the ServerID field

@@ -1,0 +1,137 @@
+#!/usr/bin/php -q
+<?php
+require("config");
+
+$link = @mysql_connect ($DBHost, $DBUsername, $DBPassword);
+if (!$link) { exit; }
+
+mysql_select_db ($DBName, $link);
+
+copy($DNSConfig . ".static", $DNSConfig . ".new");
+$configfile = fopen($DNSConfig . ".new", "a");
+
+$domains = mysql_query("SELECT Domains.ID, Domains.Name, DomainName, DNS, DNSPrimary, DNSSerial FROM Domains LEFT JOIN Users ON Users.ID =Domains.UserID WHERE Users.Enabled=1 AND Users.Hosting=1 AND Domains.Enabled=1 AND DNS<>'none' ORDER BY DomainName;", $link);
+for ($domainid = 0; $domainid < @mysql_num_rows($domains); $domainid++) {
+  $domain = @mysql_fetch_array($domains);
+
+  if ($domain['DNS'] == "primary") {
+    fputs($configfile, "\n");
+    fputs($configfile, "zone \"" . $domain['DomainName'] . "\"{\n");
+    fputs($configfile, "\ttype master;\n");
+    fputs($configfile, "\tfile \"" . $domain['Name'] . ".zone\";\n");
+    fputs($configfile, "\tnotify yes;\n");
+    fputs($configfile, "\tallow-transfer {\n");
+    fputs($configfile, "\t\tsecondaries;\n");
+    fputs($configfile, "\t\tlocal;\n");
+    fputs($configfile, "\t};\n");
+    fputs($configfile, "};\n");
+
+    $serial = nextserial($domain['DNSSerial']);
+
+    $zonefile = fopen($DNSZones . $domain['Name'] . ".zone.new", "a");
+    fputs($zonefile, "\$TTL\t43200\n");
+    fputs($zonefile, "@\t\tIN\tSOA\tdns.earlsoft.co.uk.\tdean.earlsoft.co.uk. (\n");
+    fputs($zonefile, "\t\t\t" . $serial . " ; serial\n");
+    fputs($zonefile, "\t\t\t3600 ; refresh\n");
+    fputs($zonefile, "\t\t\t900 ; retry\n");
+    fputs($zonefile, "\t\t\t1209600 ; expire\n");
+    fputs($zonefile, "\t\t\t43200 ; default_ttl\n");
+    fputs($zonefile, "\t\t\t)\n");
+    fputs($zonefile, "\n");
+
+    fputs($zonefile, "@\t\tIN\tNS\tdns.earlsoft.co.uk.\n");
+    for ($serverid = 0; $serverid < count($ServersBackupNS); $serverid++) {
+      fputs($zonefile, "@\t\tIN\tNS\t" . $ServersBackupNS[$serverid] . ".\n");
+    }
+    fputs($zonefile, "\n");
+
+    fputs($zonefile, "@\t\tIN\tMX\t5\tmail.earlsoft.co.uk.\n");
+    for ($serverid = 0; $serverid < count($ServersBackupMX); $serverid++) {
+      fputs($zonefile, "@\t\tIN\tMX\t10\t" . $ServersBackupMX[$serverid] . ".\n");
+    }
+    fputs($zonefile, "\n");
+    
+
+    $hosts = mysql_query("SELECT Name, Type, Data FROM Hosts WHERE DomainID='" . mysql_escape_string($domain['ID']) . "' ORDER BY Name;", $link);
+    for ($hostid = 0; $hostid < @mysql_num_rows($hosts); $hostid++) {
+      $host = @mysql_fetch_array($hosts);
+      if ($host['Type'] == "a") {
+        if ($host['Name'] == "") { fputs($zonefile, "@"); } else { fputs($zonefile, $host['Name']); }
+        fputs($zonefile, "\tIN\tA\t" . $host['Data'] . "\n");
+      } elseif ($host['Type'] == "cname") {
+        if ($host['Name'] == "") { fputs($zonefile, "@"); } else { fputs($zonefile, $host['Name']); }
+        fputs($zonefile, "\tIN\tCNAME\t" . $host['Data'] . "\n");
+      } elseif ($host['Type'] == "website") {
+        if ($host['Name'] == "") { fputs($zonefile, "@"); } else { fputs($zonefile, $host['Name']); }
+        fputs($zonefile, "\tIN\tA\t217.204.224.131\n");
+      }
+
+    }
+    mysql_free_result($hosts);
+    fclose($zonefile);
+
+    if (file_exists($DNSZones . $domain['Name'] . ".zone")) {
+      exec("diff -ibBI serial --brief " . $DNSZones . $domain['Name'] . ".zone.new " . $DNSZones . $domain['Name'] . ".zone", $output, $changed);
+      if ($changed == 0) {
+        unlink($DNSZones . $domain['Name'] . ".zone.new");
+      } else {
+        system("chmod --reference " . $DNSConfig . " " . $DNSZones . $domain['Name'] . ".zone.new");
+
+        rename($DNSZones . $domain['Name'] . ".zone.new", $DNSZones . $domain['Name'] . ".zone");
+
+        print "reloading " . $domain['DomainName'] . "\n";
+        system($PathNamedRNDC . " reload " . $domain['DomainName']);
+
+        mysql_query("UPDATE Domains SET DNSSerial='" . mysql_escape_string($serial) . "' WHERE ID='" . mysql_escape_string($domain['ID']) . "';", $link);
+      }        
+
+    } else {
+      system("chmod --reference " . $DNSConfig . " " . $DNSZones . $domain['Name'] . ".zone.new");
+
+      rename($DNSZones . $domain['Name'] . ".zone.new", $DNSZones . $domain['Name'] . ".zone");
+
+      mysql_query("UPDATE Domains SET DNSSerial='" . mysql_escape_string($serial) . "' WHERE ID='" . mysql_escape_string($domain['ID']) . "';", $link);
+
+      $new = 1;
+    }
+
+  } elseif ($domain['DNS'] == "secondary") {
+    fputs($configfile, "\n");
+    fputs($configfile, "zone \"" . $domain['DomainName'] . "\"{\n");
+    fputs($configfile, "\ttype slave;\n");
+    fputs($configfile, "\tfile \"" . $domain['Name'] . ".zone\";\n");
+    fputs($configfile, "\tmasters {\n");
+    fputs($configfile, "\t\t" . $domain['DNSPrimary'] . ";\n");
+    fputs($configfile, "\t};\n");
+    fputs($configfile, "};\n");
+  }
+}
+mysql_free_result($domains);
+
+fclose($configfile);
+
+mysql_close($link);
+
+exec("diff --brief " . $DNSConfig . ".new " . $DNSConfig, $output, $changed);
+
+if ($changed == 0) {
+  unlink($DNSConfig . ".new");
+} elseif ($changed == 1) {
+  system("chmod --reference " . $DNSConfig . " " . $DNSConfig . ".new");
+
+  rename($DNSConfig . ".new", $DNSConfig);
+
+  print "Restarting Named\n";
+  system($PathNamedRNDC . " reload");
+}
+
+function nextserial($serial) {
+  $today = date("Ymd");
+  if (substr($serial, 0, 8) == $today) {
+    $serial = $today . str_pad(substr($serial, 8) + 1, 2, "0", STR_PAD_LEFT);
+  } else {
+    $serial = $today . "01";
+  }
+  return $serial;
+}
+?>

@@ -1,0 +1,26 @@
+<?php
+// These will all need to be changed to point at your mysql server.
+$DBHost = "server";
+$DBName = "dbname";
+$DBUsername = "username";
+$DBPassword = "password";
+
+// These should all be fine left at their defaults.
+$MailLocalHostNames = "/etc/mail/local-host-names";
+$MailAliases = "/etc/aliases";
+$MailVirtUserTable = "/etc/mail/virtusertable";
+$MailRelayDomains = "/etc/mail/relay-domains";
+$MailMailerTable = "/etc/mail/mailertable";
+$PathSendmailInit = "/etc/rc.d/init.d/sendmail";
+
+$DNSConfig = "/etc/named.conf";
+$DNSZones = "/var/named/";
+$PathNamedRNDC = "/usr/sbin/rndc";
+
+$HTTPConfig = "/etc/httpd/httpd.conf";
+$PathHTTPInit = "/etc/rc.d/init.d/httpd";
+
+// These will be added for any corresponding DNS entries.
+$ServersBackupNS = array();
+$ServersBackupMX = array();
+?>

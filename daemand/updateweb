@@ -1,0 +1,110 @@
+#!/usr/bin/php -q
+<?php
+require("config");
+
+$link = @mysql_connect ($DBHost, $DBUsername, $DBPassword);
+if (!$link) { exit; }
+
+mysql_select_db ($DBName, $link);
+
+copy($HTTPConfig . ".static", $HTTPConfig . ".new");
+$configfile = fopen($HTTPConfig . ".new", "a");
+
+$websites = mysql_query("SELECT Websites.ID, Websites.Name, Trial, Logging, Users.Name AS UserName FROM Websites LEFT JOIN Users ON Users.ID = Websites.UserID WHERE Enabled=1 AND Hosting=1 ORDER BY Name;", $link);
+for ($websiteid = 0; $websiteid < @mysql_num_rows($websites); $websiteid++) {
+  $website = @mysql_fetch_array($websites);
+
+  $hosts = mysql_query("SELECT ID, Host FROM WebsiteHosts WHERE WebsiteID='" . mysql_escape_string($website['ID']) . "' ORDER BY Host;", $link);
+  $fhosts = mysql_query("SELECT Hosts.ID, Hosts.Name, DomainName FROM Hosts LEFT JOIN Domains ON Domains.ID=Hosts.DomainID WHERE Type='website' AND Data='" . mysql_escape_string($website['ID']) . "' ORDER BY Hosts.Name;", $link);
+
+  if ($hosts or $fhosts){
+    unset($names);
+    for($row = 0; $row < @mysql_num_rows($fhosts); $row++){
+      $fhost = @mysql_fetch_array($fhosts);
+      if ($fhost['Name'] == ""){
+        $names[] = $fhost['DomainName'];
+      }else{
+        $names[] = $fhost['Name'] . "." . $fhost['DomainName'];
+      }
+    }
+    for($row = 0; $row < @mysql_num_rows($hosts); $row++){
+      $host = @mysql_fetch_array($hosts);
+      $names[] = $host['Host'];
+    }
+
+    fputs($configfile, "\n");
+    for($row = 0; $row < count($names); $row++){
+      if ($row == 0) {
+        fputs($configfile, "<VirtualHost " . $names[$row] . ">\n");
+      } else {
+        fputs($configfile, "\tServerAlias " . $names[$row] . "\n");
+      }
+    }
+    fputs($configfile, "\tDocumentRoot /home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/\n");
+    if ($website['Logging']) {
+      fputs($configfile, "\tCustomLog /home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log combined\n");
+    } else {
+      fputs($configfile, "\tCustomLog /dev/null combined\n");
+    }
+    fputs($configfile, "</VirtualHost>\n");
+
+    if (!file_exists("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/")) {
+      print "Creating website directory " . $website['Name'] . " for " . $website['UserName'] . "\n";
+      mkdir("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", 0750);
+      chown("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", $website['UserName']);
+      chgrp("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", "apache");
+
+      symlink("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", "/data/websites/live/" . $website['Name']);
+    }
+
+    if ($website['Logging']) {
+      if (!file_exists("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log")) {
+        print "Creating website log " . $website['Name'] . " for " . $website['UserName'] . "\n";
+        touch("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log");
+        chmod("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", 0640);
+        chown("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", $website['UserName']);
+        chgrp("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", "apache");
+
+        symlink("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", "/data/logs/" . $website['Name'] . "_log");
+      }
+    }
+
+  }
+  mysql_free_result($hosts);
+  mysql_free_result($fhosts);
+
+  if ($website['Trial']) {
+    fputs($configfile, "\n");
+    fputs($configfile, "<VirtualHost " . $website['Name'] . ".trial.earlsoft.co.uk>\n");
+    fputs($configfile, "\tDocumentRoot /home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/\n");
+    fputs($configfile, "\tCustomLog /dev/null combined\n");
+    fputs($configfile, "</VirtualHost>\n");
+
+    if (!file_exists("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/")) {
+      print "Creating trial website directory " . $website['Name'] . " for " . $website['UserName'] . "\n";
+      mkdir("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/", 0750);
+      chown("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/", $website['UserName']);
+      chgrp("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/", "apache");
+
+      symlink("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/", "/data/websites/" . $website['Name']);
+    }
+
+  }
+}
+mysql_free_result($websites);
+
+fclose($configfile);
+
+mysql_close($link);
+
+exec("diff --brief " . $HTTPConfig . ".new " . $HTTPConfig, $output, $changed);
+
+if ($changed == 0) {
+  unlink($HTTPConfig . ".new");
+} else {
+  system("chmod --reference " . $HTTPConfig . " " . $HTTPConfig . ".new");
+  rename($HTTPConfig . ".new", $HTTPConfig);
+  system($PathHTTPInit . " restart >/dev/null");
+  print "Restarting apache\n";
+}
+?>

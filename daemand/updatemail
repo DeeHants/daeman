@@ -1,0 +1,111 @@
+#!/usr/bin/php -q
+<?php
+require("config");
+
+// Connect to the central MySQL server and exit if it cant
+$link = @mysql_connect ($DBHost, $DBUsername, $DBPassword);
+if (!$link) { exit; }
+mysql_select_db ($DBName, $link);
+
+// Copy the static config files and open them for appending
+copy($MailLocalHostNames . ".static", $MailLocalHostNames . ".new");
+$hostnamefile = fopen($MailLocalHostNames . ".new", "a");
+copy($MailAliases . ".static", $MailAliases . ".new");
+$aliasfile = fopen($MailAliases . ".new", "a");
+copy($MailVirtUserTable . ".static", $MailVirtUserTable . ".new");
+$userfile = fopen($MailVirtUserTable . ".new", "a");
+copy($MailRelayDomains . ".static", $MailRelayDomains . ".new");
+$relayfile = fopen($MailRelayDomains . ".new", "a");
+copy($MailMailerTable . ".static", $MailMailerTable . ".new");
+$mailerfile = fopen($MailMailerTable . ".new", "a");
+
+$domains = mysql_query ("SELECT Domains.ID, Domains.Name, DomainName, Mail, MailPrimary FROM Domains LEFT JOIN Users ON Users.ID = Domains.UserID WHERE Users.Enabled=1 AND Users.Hosting=1 AND Domains.Enabled=1 AND Mail <> 'none' ORDER BY DomainName;", $link);
+for ($domainid = 0; $domainid < @mysql_num_rows($domains); $domainid++) {
+  $domain = @mysql_fetch_array($domains);
+
+  if ($domain['Mail'] == "primary") {
+    fputs($hostnamefile, $domain['DomainName'] . "\n");
+    fputs($aliasfile, "\n");
+    fputs($userfile, "\n");
+
+    $aliases = mysql_query("SELECT Name, Type, Data FROM Aliases WHERE DomainID=" . mysql_escape_string($domain['ID']) . " ORDER BY Name;", $link);
+    for ($aliasid = 0; $aliasid < @mysql_num_rows($aliases); $aliasid++) {
+      $alias = @mysql_fetch_array($aliases);
+      if ($alias['Type'] == "address") {
+        fputs($aliasfile, $domain['Name']);
+        if ($alias['Name'] != "") { fputs($aliasfile, "-" . $alias['Name']); }
+        fputs($aliasfile, ":\t");
+
+        $emails = split(",", $alias['Data']);
+        for ($email = 0; $email < count($emails); $email++){
+          $emails[$email] = str_replace(" ", "", $emails[$email]);
+          fputs($aliasfile, $emails[$email]);
+          if (!strstr($emails[$email], "@")) {
+            fputs($aliasfile, "@" . $domain['DomainName']);
+          }
+          if ($email < (count($emails) - 1)) {
+            fputs($aliasfile, ", ");
+          }
+        }
+        fputs($aliasfile, "\n");
+      }
+
+      fputs($userfile, $alias['Name'] . "@" . $domain['DomainName'] . "\t" . $domain['Name']);
+    if ($alias['Name'] != "") { fputs($userfile, "-" . $alias['Name']); }
+      fputs($userfile, "\n");
+    }
+    mysql_free_result($aliases);
+
+  } elseif($domain['Mail'] == "secondary") {
+    fputs($relayfile, $domain['DomainName'] . "\n");
+    if ($domain['MailPrimary'] != "") {
+      fputs($mailerfile, $domain['DomainName'] . "\tesmtp:[" . $domain['MailPrimary'] . "]\n");
+    }
+  }
+}
+mysql_free_result($domains);
+
+fclose($hostnamefile);
+fclose($aliasfile);
+fclose($userfile);
+fclose($relayfile);
+fclose($mailerfile);
+
+mysql_close($link);
+
+exec("diff --brief " . $MailVirtUserTable . ".new " . $MailVirtUserTable, $output, $changed);
+if ($changed == 0) {
+  exec("diff --brief " . $MailAliases . ".new " . $MailAliases, $output, $changed);
+  if ($changed == 0) {
+    exec("diff --brief " . $MailRelayDomains . ".new " . $MailRelayDomains, $output, $changed);
+    if ($changed == 0) {
+      exec("diff --brief " . $MailMailerTable . ".new " . $MailMailerTable, $output, $changed);
+    }
+  }
+}
+
+if ($changed == 0) {
+  unlink($MailVirtUserTable . ".new");
+  unlink($MailLocalHostNames . ".new");
+  unlink($MailAliases . ".new");
+  unlink($MailRelayDomains . ".new");
+  unlink($MailMailerTable . ".new");
+} else {
+  system("chmod --reference " . $MailVirtUserTable . " " . $MailVirtUserTable . ".new");
+  system("chmod --reference " . $MailLocalHostNames . " " . $MailLocalHostNames . ".new");
+  system("chmod --reference " . $MailAliases . " " . $MailAliases . ".new");
+  system("chmod --reference " . $MailRelayDomains . " " . $MailRelayDomains . ".new");
+  system("chmod --reference " . $MailMailerTable . " " . $MailMailerTable . ".new");
+
+  rename($MailVirtUserTable . ".new", $MailVirtUserTable);
+  rename($MailLocalHostNames . ".new", $MailLocalHostNames);
+  rename($MailAliases . ".new", $MailAliases);
+  rename($MailRelayDomains . ".new", $MailRelayDomains);
+  rename($MailMailerTable . ".new", $MailMailerTable);
+
+  system("makemap -f hash " . $MailVirtUserTable . ".db < " . $MailVirtUserTable);
+  system("makemap -f hash " . $MailMailerTable . ".db < " . $MailMailerTable);
+  system($PathSendmailInit . " restart >/dev/null");
+  print "Restarting sendmail\n";
+}
+?>
