@@ -16,7 +16,7 @@ if (isset($_REQUEST['loginusername']) && isset($_REQUEST['loginpassword'])) {
     $loggedin = true;
     $currentuserid = $loginuserid;
     session_register("loggedin", "currentuserid");
-    setcookie("lastusername", $_REQUEST['loginusername']);
+    setcookie("lastusername", $_REQUEST['loginusername'], time() + 31536000);
     if (isset($_REQUEST['url'])) {
       header("Location: " . $_REQUEST['url']);
       exit;
@@ -34,7 +34,13 @@ if ($loggedin){
   print_header("Logged in: " . $details['RealName']);
 ?>
   <h3>Home</h3>
+<?php
+  if ($details['Hosting'] == 1) {
+?>
   <p><a href="user.php?userid=<?php print urlencode($currentuserid); ?>">Administer account</a></p>
+<?php
+  }
+?>
   <p><a href="chpasswd.php?userid=<?php print urlencode($currentuserid); ?>">Change password</a></p>
 <?php
   if (userisadmin($currentuserid)){
@@ -43,6 +49,7 @@ if ($loggedin){
 <?php
   }
 ?>
+  <p><a href="tools/">Tools</a></p>
   <p><a href="index.php?action=logout">Log out</a></p>
 <?php
   print_footer();

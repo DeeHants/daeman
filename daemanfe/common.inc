@@ -68,7 +68,7 @@ function userisadmin($userid){
 }
 
 function userdetails($userid) {
-  $users = execute("SELECT ID, Name, AccountID, RealName FROM Users WHERE ID='" . mysql_escape_string($userid) . "';");
+  $users = execute("SELECT ID, Name, AccountID, RealName, Hosting FROM Users WHERE ID='" . mysql_escape_string($userid) . "';");
   if (count($users) > 0){
     return $users[0];
   }else{

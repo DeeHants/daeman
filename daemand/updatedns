@@ -1,7 +1,7 @@
 <?php
 $configfile = openconfig($DNSConfig);
 
-$domains = mysql_query("SELECT Domains.ID, Domains.Name, DomainName, DNS, DNSPrimary, DNSSerial FROM Domains LEFT JOIN Users ON Users.ID =Domains.UserID WHERE Users.Enabled=1 AND Users.Hosting=1 AND Domains.Enabled=1 AND DNS<>'none' AND DNSServerID='" . mysql_escape_string($localserverid) . "' ORDER BY DomainName;", $link);
+$domains = mysql_query("SELECT Domains.ID, Domains.Name, DomainName, Mail, MailPrimary, MailServerID, DNS, DNSPrimary, DNSSerial FROM Domains LEFT JOIN Users ON Users.ID =Domains.UserID WHERE Users.Enabled=1 AND Users.Hosting=1 AND Domains.Enabled=1 AND DNS<>'none' AND DNSServerID='" . mysql_escape_string($localserverid) . "' ORDER BY DomainName;", $link);
 for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
   $domain = mysql_fetch_array($domains);
 
@@ -21,7 +21,7 @@ for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
 
     $zonefile = fopen($DNSZones . $domain['Name'] . ".zone.new", "a");
     fputs($zonefile, "\$TTL\t43200\n");
-    fputs($zonefile, "@\t\tIN\tSOA\tdns.earlsoft.co.uk.\tdean.earlsoft.co.uk. (\n");
+    fputs($zonefile, "@\t\tIN\tSOA\t" . $localservername . ".\tdean.earlsoft.co.uk. (\n");
     fputs($zonefile, "\t\t\t" . $serial . " ; serial\n");
     fputs($zonefile, "\t\t\t3600 ; refresh\n");
     fputs($zonefile, "\t\t\t900 ; retry\n");
@@ -30,18 +30,22 @@ for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
     fputs($zonefile, "\t\t\t)\n");
     fputs($zonefile, "\n");
 
-    fputs($zonefile, "@\t\tIN\tNS\tdns.earlsoft.co.uk.\n");
+    fputs($zonefile, "@\t\tIN\tNS\t" . $localservername . ".\n");
     for ($serverid = 0; $serverid < count($ServersBackupNS); $serverid++) {
       fputs($zonefile, "@\t\tIN\tNS\t" . $ServersBackupNS[$serverid] . ".\n");
     }
     fputs($zonefile, "\n");
 
-    fputs($zonefile, "@\t\tIN\tMX\t5\tmail.earlsoft.co.uk.\n");
-    for ($serverid = 0; $serverid < count($ServersBackupMX); $serverid++) {
-      fputs($zonefile, "@\t\tIN\tMX\t10\t" . $ServersBackupMX[$serverid] . ".\n");
+    if ($domain['Mail'] == "primary") {
+      fputs($zonefile, "@\t\tIN\tMX\t5\tmail.earlsoft.co.uk.\n");
+      for ($serverid = 0; $serverid < count($ServersBackupMX); $serverid++) {
+        fputs($zonefile, "@\t\tIN\tMX\t10\t" . $ServersBackupMX[$serverid] . ".\n");
+      }
+      fputs($zonefile, "\n");
+    } elseif ($domain['MailPrimary'] != "") {
+      fputs($zonefile, "@\t\tIN\tMX\t5\t" . $domain['MailPrimary'] . "\n");
+      fputs($zonefile, "\n");
     }
-    fputs($zonefile, "\n");
-    
 
     $hosts = mysql_query("SELECT Name, Type, Data FROM Hosts WHERE DomainID='" . mysql_escape_string($domain['ID']) . "' ORDER BY Name;", $link);
     for ($hostid = 0; $hostid < mysql_num_rows($hosts); $hostid++) {
@@ -52,7 +56,9 @@ for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
 
       } elseif ($host['Type'] == "cname") {
         if ($host['Name'] == "") { fputs($zonefile, "@"); } else { fputs($zonefile, $host['Name']); }
-        fputs($zonefile, "\tIN\tCNAME\t" . $host['Data'] . "\n");
+        fputs($zonefile, "\tIN\tCNAME\t" . $host['Data']);
+        if (strpos($host['Data'], ".") != 0) { fputs($zonefile, "."); }
+        fputs($zonefile, "\n");
 
       } elseif ($host['Type'] == "website") {
         $websites = mysql_query("SELECT Websites.Name, Servers.Address FROM Websites LEFT JOIN Servers ON Websites.ServerID=Servers.ID WHERE Websites.ID='" . mysql_escape_string($host['Data']) . "';");
@@ -95,7 +101,7 @@ for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
 
   } elseif ($domain['DNS'] == "secondary") {
     fputs($configfile, "\n");
-    fputs($configfile, "zone \"" . $domain['DomainName'] . "\"{\n");
+    fputs($configfile, "zone \"" . $domain['DomainName'] . "\" {\n");
     fputs($configfile, "\ttype slave;\n");
     fputs($configfile, "\tfile \"" . $domain['Name'] . ".zone\";\n");
     fputs($configfile, "\tmasters {\n");

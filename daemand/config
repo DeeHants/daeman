@@ -16,8 +16,9 @@ $MailSendmailInit = "/etc/rc.d/init.d/sendmail";
 $DNSConfig = "/etc/named.conf";
 $DNSZones = "/var/named/";
 $DNSNamedRNDC = "/usr/sbin/rndc";
+$DNSHostmasterEmail = "user@localhost";
 
-$HTTPConfig = "/etc/httpd/httpd.conf";
+$HTTPConfig = "/etc/httpd/conf/httpd.conf";
 $HTTPApacheInit = "/etc/rc.d/init.d/httpd";
 
 $LogUpdateScript = "/usr/bin/updatelogs";

@@ -15,12 +15,13 @@ for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
     fputs($aliasfile, "\n");
     fputs($userfile, "\n");
 
+    $addeddefault = false;
     $aliases = mysql_query("SELECT Name, Type, Data FROM Aliases WHERE DomainID=" . mysql_escape_string($domain['ID']) . " ORDER BY Name;", $link);
     for ($aliasid = 0; $aliasid < mysql_num_rows($aliases); $aliasid++) {
       $alias = mysql_fetch_array($aliases);
       if ($alias['Type'] == "address") {
         fputs($aliasfile, $domain['Name']);
-        if ($alias['Name'] != "") { fputs($aliasfile, "-" . $alias['Name']); }
+        if ($alias['Name'] != "") { fputs($aliasfile, "-" . $alias['Name']); } else { $addeddefault = true; }
         fputs($aliasfile, ":\t");
 
         $emails = split(",", $alias['Data']);
@@ -30,18 +31,21 @@ for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
           if (!strstr($emails[$email], "@")) {
             fputs($aliasfile, "@" . $domain['DomainName']);
           }
-          if ($email < (count($emails) - 1)) {
-            fputs($aliasfile, ", ");
-          }
+          if ($email < (count($emails) - 1)) { fputs($aliasfile, ", "); }
         }
         fputs($aliasfile, "\n");
       }
 
       fputs($userfile, $alias['Name'] . "@" . $domain['DomainName'] . "\t" . $domain['Name']);
-    if ($alias['Name'] != "") { fputs($userfile, "-" . $alias['Name']); }
+      if ($alias['Name'] != "") { fputs($userfile, "-" . $alias['Name']); }
       fputs($userfile, "\n");
     }
     mysql_free_result($aliases);
+
+    if (!$addeddefault) {
+      fputs($aliasfile, $domain['Name'] . ":\tdevnull\n");
+      fputs($userfile, "@" . $domain['DomainName'] . "\t" . $domain['Name'] . "\n");
+    }
 
   } elseif($domain['Mail'] == "secondary") {
     fputs($relayfile, $domain['DomainName'] . "\n");

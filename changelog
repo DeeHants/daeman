@@ -116,3 +116,24 @@ X  0.09
 28/07/2003
  * Made all the code work without register_globals
 X  0.10
+
+08/09/2003
+ * Added support for alternative MX servers for a domain
+ * Made the update DNS script use the local server name instead of hard coding it
+ * Removed spurious tabs from the DNS zone files
+
+23/10/2003
+ * Made the username cookie expire after a year
+
+28/10/2003
+ * Added a tools section with a whois tool
+ * Changed the footer "copyright" text
+
+31/10/2003
+ * Removed the "administer account" link when hosting is disabled for a user
+ * Added a Radius server capability
+ * Fixed the default httpd.conf path
+ * Appended a . onto the end of fully qualified CNAME hosts (names containign a .)
+ * Disabled certain account admin options when there are no servers with that capability
+ * Added a config option for DNS hostmaster
+X  0.11

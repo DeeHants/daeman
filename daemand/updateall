@@ -3,6 +3,8 @@
 require("config");
 require("common");
 
+ini_set("html_errors", 0);
+
 // Connect to the central MySQL server and exit if it cant
 $link = @mysql_connect ($DBHost, $DBUsername, $DBPassword);
 if (!$link) { 
@@ -13,7 +15,7 @@ mysql_select_db ($DBName, $link);
 
 // Get the settings that apply to the current server
 $hostname = exec("hostname -s");
-$servers = mysql_query ("SELECT ID, Live, DNS, Mail, HTTP, DB, Shell FROM Servers WHERE Name='" . mysql_escape_string($hostname) . "';", $link);
+$servers = mysql_query ("SELECT ID, FullName, Address, Live, DNS, Mail, HTTP, DB, Shell FROM Servers WHERE Name='" . mysql_escape_string($hostname) . "';", $link);
 if (mysql_num_rows($servers) == 0) {
   mysql_free_result($servers);
   print "There is no entry for this server.\n";
@@ -22,6 +24,8 @@ if (mysql_num_rows($servers) == 0) {
   mysql_free_result($servers);
   if ($server['Live']) {
     $localserverid = $server['ID'];
+    $localservername = $server['FullName'];
+    $localserveraddress = $server['Address'];
 
     // Update everything as necessary
     include("updateusers");

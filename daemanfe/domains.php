@@ -61,21 +61,21 @@ if (userisadmin($currentuserid)) {
     $domain = execute("SELECT DomainName, Registrar, Expiry, Enabled, DNS, DNSPrimary, DNSServerID, Mail, MailPrimary, MailServerID FROM Domains WHERE ID='" . mysql_escape_string($_REQUEST['domainid']) . "';");
 ?>
   <a name=domainform>
-  <form action="domains.php" method="POST">
+  <form action="domains.php" method="POST" id="domainform">
    <input name="action" type="hidden" value="updatedomain">
    <input name="userid" type="hidden" value="<?php print htmlspecialchars($details['ID']); ?>">
    <input name="domainid" type="hidden" value="<?php print htmlspecialchars($_REQUEST['domainid']); ?>">
    <table>
-    <tr><td>Domain name</td><td><input name="domainname" value="<?php print htmlspecialchars($domain[0]['DomainName']); ?>"> <a href="help.php#domaindomainname">?</a></td></tr>
-    <tr><td>Registrar</td><td><input name="registrar" value="<?php print htmlspecialchars($domain[0]['Registrar']); ?>"> <a href="help.php#domainregistrar">?</a></td></tr>
-    <tr><td>Expiry</td><td><input name="expiry" value="<?php print htmlspecialchars($domain[0]['Expiry']); ?>"> <a href="help.php#domainexpiry">?</a></td></tr>
-    <tr><td>Enabled</td><td><input type="checkbox" name="enabled" value=1<?php if ($domain[0]['Enabled']) { print " checked"; } ?>> <a href="../help.php#domainenabled">?</a></td></tr>
-    <tr><td>DNS</td><td><select name="dns"><option value="primary"<?php if($domain[0]['DNS']=="primary"){ print " selected";} ?>>Primary<option value="secondary"<?php if($domain[0]['DNS']=="secondary"){ print " selected";} ?>>Secondary<option value="none"<?php if ($domain[0]['DNS']=="none"){ print " selected";} ?>>None</select> <a href="help.php#domaindns"></td></tr>
-    <tr><td>Primary DNS server</td><td><input name="dnsprimary" value="<?php print htmlspecialchars($domain[0]['DNSPrimary']); ?>"> <a href="help.php#domaindnsprimary">?</a></td></tr>
-    <tr><td>DNS Server</td><td><select name="dnsserverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE DNS=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\"" . iif($domain[0]['DNSServerID'] == $servers[$serverid]['ID'], " selected", "") . ">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#domaindnsserverid">?</a></td></tr>
-    <tr><td>Mail</td><td><select name="mail"><option value="primary"<?php if($domain[0]['Mail']=="primary"){ print " selected";} ?>>Primary<option value="secondary"<?php if($domain[0]['Mail']=="secondary"){ print " selected";} ?>>Secondary<option value="none"<?php if ($domain[0]['Mail']=="none"){ print " selected";} ?>>None</select> <a href="help.php#domainmail"></td></tr>
-    <tr><td>Primary mail server</td><td><input name="mailprimary" value="<?php print htmlspecialchars($domain[0]['MailPrimary']); ?>"> <a href="help.php#domainmailprimary">?</a></td></tr>
-    <tr><td>Mail Server</td><td><select name="mailserverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE Mail=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\"" . iif($domain[0]['MailServerID'] == $servers[$serverid]['ID'], " selected", "") . ">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#domainmailserverid">?</a></td></tr>
+    <tr><td>Domain name</td><td><input name="domainname" value="<?php print htmlspecialchars($domain[0]['DomainName']); ?>" onclick="updateform()"> <a href="help.php#domaindomainname">?</a></td></tr>
+    <tr><td>Registrar</td><td><input name="registrar" value="<?php print htmlspecialchars($domain[0]['Registrar']); ?>" onclick="updateform()"> <a href="help.php#domainregistrar">?</a></td></tr>
+    <tr><td>Expiry</td><td><input name="expiry" value="<?php print htmlspecialchars($domain[0]['Expiry']); ?>" onclick="updateform()"> <a href="help.php#domainexpiry">?</a></td></tr>
+    <tr><td>Enabled</td><td><input type="checkbox" name="enabled" value=1<?php if ($domain[0]['Enabled']) { print " checked"; } ?> onclick="updateform()"> <a href="../help.php#domainenabled">?</a></td></tr>
+    <tr><td>DNS</td><td><select name="dns" onclick="updateform()"><option value="primary"<?php if($domain[0]['DNS']=="primary"){ print " selected";} ?>>Primary<option value="secondary"<?php if($domain[0]['DNS']=="secondary"){ print " selected";} ?>>Secondary<option value="none"<?php if ($domain[0]['DNS']=="none"){ print " selected";} ?>>None</select> <a href="help.php#domaindns">?</a></td></tr>
+    <tr><td>Primary DNS server</td><td><input name="dnsprimary" value="<?php print htmlspecialchars($domain[0]['DNSPrimary']); ?>" onclick="updateform()"> <a href="help.php#domaindnsprimary">?</a></td></tr>
+    <tr><td>DNS Server</td><td><select name="dnsserverid" onclick="updateform()"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE DNS=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\"" . iif($domain[0]['DNSServerID'] == $servers[$serverid]['ID'], " selected", "") . ">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#domaindnsserverid">?</a></td></tr>
+    <tr><td>Mail</td><td><select name="mail" onclick="updateform()"><option value="primary"<?php if($domain[0]['Mail']=="primary"){ print " selected";} ?>>Primary<option value="secondary"<?php if($domain[0]['Mail']=="secondary"){ print " selected";} ?>>Secondary<option value="none"<?php if ($domain[0]['Mail']=="none"){ print " selected";} ?>>None</select> <a href="help.php#domainmail">?</a></td></tr>
+    <tr><td>Primary mail server</td><td><input name="mailprimary" value="<?php print htmlspecialchars($domain[0]['MailPrimary']); ?>" onclick="updateform()"> <a href="help.php#domainmailprimary">?</a></td></tr>
+    <tr><td>Mail Server</td><td><select name="mailserverid" onclick="updateform()"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE Mail=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\"" . iif($domain[0]['MailServerID'] == $servers[$serverid]['ID'], " selected", "") . ">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#domainmailserverid">?</a></td></tr>
     <tr><td colspan=2 align=center><input type="submit" value="Update domain"></td></tr>
    </table>
   </form>
@@ -83,26 +83,38 @@ if (userisadmin($currentuserid)) {
   }else{
 ?>
   <a name=domainform>
-  <form action="domains.php" method="POST">
+  <form action="domains.php" method="POST" id="domainform">
    <input name="action" type="hidden" value="adddomain">
    <input name="userid" type="hidden" value="<?php print htmlspecialchars($details['ID']); ?>">
    <table>
-    <tr><td>Name</td><td><input name="name"> <a href="help.php#domainname">?</a></td></tr>
-    <tr><td>Domain name</td><td><input name="domainname"> <a href="help.php#domaindomainname">?</a></td></tr>
-    <tr><td>Registrar</td><td><input name="registrar"> <a href="help.php#domainregistrar">?</a></td></tr>
-    <tr><td>Expiry</td><td><input name="expiry"> <a href="help.php#domainexpiry">?</a></td></tr>
-    <tr><td>Enabled</td><td><input type="checkbox" name="enabled" value=1 checked> <a href="../help.php#domainenabled">?</a></td></tr>
-    <tr><td>DNS</td><td><select name="dns"><option value="primary" selected>Primary<option value="secondary">Secondary<option value="none">None</select> <a href="help.php#domaindns"></td></tr>
-    <tr><td>Primary DNS server</td><td><input name="dnsprimary"> <a href="help.php#domaindnsprimary">?</a></td></tr>
-    <tr><td>DNS Server</td><td><select name="dnsserverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE DNS=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#domaindnsserverid">?</a></td></tr>
-    <tr><td>Mail</td><td><select name="mail"><option value="primary" selected>Primary<option value="secondary">Secondary<option value="none">None</select> <a href="help.php#domainmail"></td></tr>
-    <tr><td>Primary mail server</td><td><input name="mailprimary"> <a href="help.php#domainmailprimary">?</a></td></tr>
-    <tr><td>Mail Server</td><td><select name="mailserverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE Mail=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#domainmailserverid">?</a></td></tr>
+    <tr><td>Name</td><td><input name="name" onclick="updateform()"> <a href="help.php#domainname">?</a></td></tr>
+    <tr><td>Domain name</td><td><input name="domainname" onclick="updateform()"> <a href="help.php#domaindomainname">?</a></td></tr>
+    <tr><td>Registrar</td><td><input name="registrar" onclick="updateform()"> <a href="help.php#domainregistrar">?</a></td></tr>
+    <tr><td>Expiry</td><td><input name="expiry" onclick="updateform()"> <a href="help.php#domainexpiry">?</a></td></tr>
+    <tr><td>Enabled</td><td><input type="checkbox" name="enabled" value=1 checked onclick="updateform()"> <a href="../help.php#domainenabled">?</a></td></tr>
+    <tr><td>DNS</td><td><select name="dns" onclick="updateform()"><option value="primary" selected>Primary<option value="secondary">Secondary<option value="none">None</select> <a href="help.php#domaindns">?</a></td></tr>
+    <tr><td>Primary DNS server</td><td><input name="dnsprimary" onclick="updateform()"> <a href="help.php#domaindnsprimary">?</a></td></tr>
+    <tr><td>DNS Server</td><td><select name="dnsserverid" onclick="updateform()"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE DNS=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#domaindnsserverid">?</a></td></tr>
+    <tr><td>Mail</td><td><select name="mail" onclick="updateform()"><option value="primary" selected>Primary<option value="secondary">Secondary<option value="none">None</select> <a href="help.php#domainmail">?</a></td></tr>
+    <tr><td>Primary mail server</td><td><input name="mailprimary" onclick="updateform()"> <a href="help.php#domainmailprimary">?</a></td></tr>
+    <tr><td>Mail Server</td><td><select name="mailserverid" onclick="updateform()"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE Mail=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#domainmailserverid">?</a></td></tr>
     <tr><td colspan=2 align=center><input type="submit" value="Add domain"></td></tr>
    </table>
   </form>
 <?php
   }
+?>
+  <script language=javascript>
+function updateform() {
+  domainform.dns.disabled = !domainform.enabled.checked;
+  domainform.dnsprimary.visible = !(!domainform.enabled.checked || domainform.dns.value == "primary");
+  domainform.dnsserverid.disabled = !domainform.enabled.checked || domainform.dns.value == "none";
+  domainform.mail.disabled = !domainform.enabled.checked;
+  domainform.mailprimary.disabled = !domainform.enabled.checked || domainform.mail.value == "primary";
+  domainform.mailserverid.disabled = !domainform.enabled.checked || domainform.mail.value == "none";
+}
+  </script>
+<?php
 }
 
 print_footer();
