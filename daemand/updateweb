@@ -1,7 +1,7 @@
 <?php
 $configfile = openconfig($HTTPConfig);
 
-$websites = mysql_query("SELECT Websites.ID, Websites.Name, Trial, Logging, Redirect, Parameters, Users.Name AS UserName FROM Websites LEFT JOIN Users ON Users.ID = Websites.UserID WHERE Enabled=1 AND Hosting=1 AND ServerID='" . mysql_escape_string($localserverid) . "' ORDER BY Name;", $link);
+$websites = mysql_query("SELECT Websites.ID, Websites.Name, Logging, Redirect, Parameters, Users.Name AS UserName FROM Websites LEFT JOIN Users ON Users.ID = Websites.UserID WHERE Enabled=1 AND Hosting=1 AND ServerID='" . mysql_escape_string($localserverid) . "' ORDER BY Name;", $link);
 for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
   $website = mysql_fetch_array($websites);
 
@@ -24,9 +24,10 @@ for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
     }
 
     fputs($configfile, "\n");
+    fputs($configfile, "<VirtualHost *>\n");
     for($row = 0; $row < count($names); $row++){
       if ($row == 0) {
-        fputs($configfile, "<VirtualHost " . $names[$row] . ">\n");
+        fputs($configfile, "\tServerName " . $names[$row] . "\n");
       } else {
         fputs($configfile, "\tServerAlias " . $names[$row] . "\n");
       }
@@ -82,22 +83,6 @@ for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
   }
   mysql_free_result($hosts);
   mysql_free_result($fhosts);
-
-  if ($website['Trial']) {
-    fputs($configfile, "\n");
-    fputs($configfile, "<VirtualHost " . $website['Name'] . ".trial.earlsoft.co.uk>\n");
-    fputs($configfile, "\tDocumentRoot /home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/\n");
-    fputs($configfile, "\tCustomLog /dev/null combined\n");
-    fputs($configfile, "</VirtualHost>\n");
-
-    if (!file_exists("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/")) {
-      print "Creating trial website directory " . $website['Name'] . " for " . $website['UserName'] . "\n";
-      mkdir("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/", 0750);
-      chown("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/", $website['UserName']);
-      chgrp("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/", "apache");
-    }
-
-  }
 }
 mysql_free_result($websites);
 

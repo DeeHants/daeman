@@ -1,26 +1,17 @@
 <?php
 require("../common.inc");
-require("whois.inc");
+require("dns.inc");
 checkstatus();
 
-print_header("Domain lookup");
-print "  <h3><a href=\"../index.php\">Home</a> - <a href=\"index.php\">Tools</a> - Domain lookup</h3>\n";
+print_header("Name lookup");
+print "  <h3><a href=\"../index.php\">Home</a> - <a href=\"index.php\">Tools</a> - Name lookup</h3>\n";
 
 if (isset($_REQUEST['action'])) {
   if ($_REQUEST['action'] == "lookup") {
 
-    if (strpos($_REQUEST['domain'], ".") != 0) {
-      $domains[] = $_REQUEST['domain'];
-    } else {
-      $domains[] = $_REQUEST['domain'] . ".com";
-      $domains[] = $_REQUEST['domain'] . ".net";
-      $domains[] = $_REQUEST['domain'] . ".org";
-      $domains[] = $_REQUEST['domain'] . ".co.uk";
-      $domains[] = $_REQUEST['domain'] . ".org.uk";
-    }
+    $domains[] = $_REQUEST['domain'];
 
-
-    print "  <h2>Domain lookup results</h2>";
+    print "  <h2>Name lookup results</h2>";
 
     for ($domainid = 0; $domainid < count($domains); $domainid++) {
       print "  <p id=\"pleasewait" . $domains[$domainid] . "\">Please wait, looking up " . $domains[$domainid] . "...</p>\n";
@@ -38,29 +29,29 @@ if (isset($_REQUEST['action'])) {
             }
           }
           print " by ";
-          if ($info["agent.url"] != "") { print "<a href=\"" . $info["agent.url"] . "\" target=\"_blank\">"; }
+          if ($info["agent.url"] != "") { print "<a href=\"" . $info["agent.url"] . "\">"; }
           print $info["agent.name"];
           if ($info["agent.url"] != "") { print "</a>"; }
           if ($info["agent.tag"] != "") { print " (" . $info["agent.tag"] . ")"; }
+
 /*
     [status] => ACTIVE
 */        
+
           print ".<br>It was registered on " . date("j/n/Y", $info["date.registered"]) . " and expires on " . date("j/n/Y", $info["date.renewal"]) . ".</p>\n";
         } else {
-          print "  <p>" . $info["domain"] . " is currently available.</p>\n";
+          print "  <p>" . $info["registrant.name"] . " is currently available.</p>\n";
         }
-	if (isset($_REQUEST['showall'])) { 
-          print "  <pre>" . $info['data'] . "</pre>";
-        }
+//        print "  <pre>"; print_r($info); print "</pre>";
       } else {
-        print "  <p>There was an error looking up " . $domains[$domainid] . ".</p>\n";
+        print "  <p>There was an error looking up " . $info["registrant.name"] . ".</p>\n";
       }
     }
   }
 }
 ?>
-  <h2>Domain lookup</h2>
-  <form action="whois.php">
+  <h2>Name lookup</h2>
+  <form action="dns.php">
    <input type=hidden name=action value="lookup">
    <table>
     <tr><td>Domain</td><td><input name=domain value="<?php print htmlspecialchars($_REQUEST["domain"]); ?>"></td></tr>
@@ -68,7 +59,6 @@ if (isset($_REQUEST['action'])) {
     <tr><td>Top level domain</td><td><select name=suffix><option value="">Custom<option value="couk">.co.uk<option value="com">.com<option value=".net</td></tr>
     <tr><td>Guess alternatives</td><td><input type=checkbox name=guess></td></tr>
 -->
-    <tr><td>Show full whois info</td><td><input type=checkbox name=showall<?php if ($_REQUEST['showall']) { print " checked"; } ?>></td></tr>
     <tr><td colspan=2 align=center><input type=submit value="Lookup"></td></tr>
    </table>
   </form>

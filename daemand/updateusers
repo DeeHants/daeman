@@ -1,46 +1,55 @@
 <?php
-$users = mysql_query("SELECT Name, AccountID, Password, RealName, Enabled, Admin, Hosting FROM Users WHERE Enabled ORDER BY AccountID;", $link);
+$users = mysql_query("SELECT ID, Name, AccountID, Password, PasswordChanged, RealName, Enabled, Admin, Hosting FROM Users ORDER BY AccountID;", $link);
 for ($userid = 0; $userid < mysql_num_rows($users); $userid++) {
   $user = mysql_fetch_array($users);
 
   if ($server['Shell'] || $user['Admin']) { $shell = ""; } else { $shell = " -s '/sbin/nologin'"; }
 
-  exec("grep /etc/passwd -ie '" . $user['Name'] . "'", $output, $ecode);
+  unset($output);
+  exec("grep /etc/passwd -ie '^" . $user['Name'] . ":'", $output, $ecode);
+  exec("grep /etc/shadow -ie '^" . $user['Name'] . ":'", $output, $ecode2);
   if ($ecode == 1) {
-    print "Creating user " . $user['Name'] . "\n";
-    system("/usr/sbin/useradd -u " . $user['AccountID'] . $shell . " -c '" . $user['RealName'] . "' -p '" . $user['Password'] . "' " . $user['Name']);
-    chmod("/home/" . $user['Name'] . "/", 0711);
+    if ($user['Enabled']) {
+      print "Creating user " . $user['Name'] . "\n";
+      system("/usr/sbin/useradd -u " . $user['AccountID'] . $shell . " -c '" . $user['RealName'] . "' -p '" . $user['Password'] . "' " . $user['Name']);
+      chmod("/home/" . $user['Name'] . "/", 0711);
+    }
   } else {
-    //user exists, update!!!
+    $userinfo = array_merge(split(":", $output[0]), split(":", $output[1]));
+
+    if ($user['Enabled']) {
+      // Update the password
+      if ($userinfo[8] != $user['Password']) {
+        if ((mysql_to_date($user['PasswordChanged']) > $lastupdated) || ($userinfo[8] == "!!")) {
+          print "Updating the PAM password for " . $user['Name'] . "\n";
+          system("/usr/sbin/usermod -p '" . $user['Password'] . "' " . $user['Name']);
+        } else {
+          print "Updating the DB password for " . $user['Name'] . "\n";
+          mysql_query("UPDATE Users SET Password='" . mysql_escape_string($userinfo[8]) . "', DBPassword='', PasswordChanged=Now() WHERE ID='" . mysql_escape_string($user['ID']) . "';", $link);
+        }
+      }    
+
+      // Update the realname
+      if ($userinfo[4] != $user['RealName']) {
+        print "Updating the real name for " . $user['Name'] . "\n";
+        system("/usr/sbin/usermod -c '" . $user['RealName'] . "' " . $user['Name']);
+      }
+    } else {
+      if ($userinfo[8] != "!!") {
+        print "Disabling account for " . $user['Name'] . "\n";
+        system("/usr/sbin/usermod -p '!!' " . $user['Name']);
+      }    
+    }    
   }
 
-  if ($user['Hosting'] && $server['HTTP']) {
-    if (!file_exists("/home/" . $user['Name'] . "/websites/")) {
-      print "Creating website directory for " . $user['Name'] . "\n";
-      mkdir("/home/" . $user['Name'] . "/websites/", 0775);
+  if ($user['Enabled']) {
+    if ($user['Hosting'] && $server['HTTP']) {
+      if (!file_exists("/home/" . $user['Name'] . "/websites/")) {
+        print "Creating website directory for " . $user['Name'] . "\n";
+        mkdir("/home/" . $user['Name'] . "/websites/", 0775);
+      }
     }
   }
 }
 mysql_free_result($users);
-
-/*
-$accounts = mysql_query("SELECT Name, AccountID, Password, RealName, 
-Enabled, 
-Admin, Hosting FROM Users WHERE Enabled ORDER BY AccountID;", $link);
-for ($userid = 0; $userid < mysql_num_rows($users); $userid++) {
-  $user = mysql_fetch_array($users);
-
-  if ($server['Shell'] || $user['Admin']) { $shell = ""; } else { $shell = " -s '/sbin/nologin'"; }
-
-  exec("grep /etc/passwd -ie '" . $user['Name'] . "'", $output, $ecode);
-  if ($ecode == 1) {
-    print "Creating user " . $user['Name'] . "\n";
-    system("/sbin/useradd -u " . $user['AccountID'] . $shell . " -c '" . $user['RealName'] . "' -p '" . $user['Password'] . "' " . $user['Name']);
-    chmod("/home/" . $user['Name'] . "/", 0711);
-  } else {
-    //user exists, update!!!
-  }
-}
-mysql_free_result($users);
-*/
 ?>

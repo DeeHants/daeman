@@ -8,8 +8,8 @@ print_header("POP3/IMAP accounts: " . htmlspecialchars($details['Name']));
   <h3><a href="index.php">Home</a> - <a href="user.php?userid=<?php print urlencode($details['ID']); ?>">Account</a> - Mail accounts</h3>
   <h2>Accounts</h2>
 <?php
-if (isset($_REQUEST['action'])){
-  if ($_REQUEST['action'] == "addaccount"){
+if (isset($_REQUEST['action'])) {
+  if ($_REQUEST['action'] == "addaccount") {
     $res = execute("SELECT Max(AccountID) AS LastID FROM Accounts WHERE UserID='" . mysql_escape_string($details['ID']) . "';");
     $nextaccountid = $res[0]['LastID'];
     if (!($nextaccountid)) {
@@ -18,21 +18,21 @@ if (isset($_REQUEST['action'])){
     }
     $nextaccountid++;
 
-    if (execute("INSERT INTO Accounts (UserID, Name, RealName, AccountID) VALUES ('" . mysql_escape_string($details['ID']) . "', '" . mysql_escape_string($_REQUEST['name']) . "', '" . mysql_escape_string($_REQUEST['realname']) . "', '" . mysql_escape_string($nextaccountid) . "');")){
+    if (execute("INSERT INTO Accounts (UserID, Name, RealName, AccountID) VALUES ('" . mysql_escape_string($details['ID']) . "', '" . mysql_escape_string($_REQUEST['name']) . "', '" . mysql_escape_string($_REQUEST['realname']) . "', '" . mysql_escape_string($nextaccountid) . "');")) {
       print "   <p class=status>" . htmlspecialchars($_REQUEST['accountname']) . " successfully added.</p>";
-    }else{
+    } else {
       print "   <p class=error>There was an error adding " . htmlspecialchars($_REQUEST['accountname']) . ".</p>";
     }
-  }elseif ($_REQUEST['action'] == "updateaccount"){
-    if (execute("UPDATE Accounts SET RealName='" . mysql_escape_string($_REQUEST['realname']) . "' WHERE ID='" . mysql_escape_string($_REQUEST['accountid']) . "';")){
+  } elseif ($_REQUEST['action'] == "updateaccount") {
+    if (execute("UPDATE Accounts SET RealName='" . mysql_escape_string($_REQUEST['realname']) . "' WHERE ID='" . mysql_escape_string($_REQUEST['accountid']) . "';")) {
       print "  <p class=status>Email account updated successfully.</p>\n";
-    }else{
+    } else {
       print "  <p class=error>Error updating email account.</p>\n";
     }
-  }elseif ($_REQUEST['action'] == "deleteaccount"){
-    if (execute("DELETE FROM Accounts WHERE ID='" . mysql_escape_string($_REQUEST['accountid']) . "';")){
+  } elseif ($_REQUEST['action'] == "deleteaccount") {
+    if (execute("DELETE FROM Accounts WHERE ID='" . mysql_escape_string($_REQUEST['accountid']) . "';")) {
       print "  <p class=status>Email account deleted successfully.</p>\n";
-    }else{
+    } else {
       print "  <p class=error>Error deleting email account.</p>\n";
     }
   }
@@ -40,23 +40,22 @@ if (isset($_REQUEST['action'])){
 
 $accounts = execute("SELECT ID, Name, RealName FROM Accounts WHERE UserID='" . mysql_escape_string($details['ID']) . "';");
 
-if ($accounts){
+if ($accounts) {
 ?>
   <table>
    <tr><th>Actions</th><th>Name</th><th>Real name</th></tr>
 <?php
-  for($row = 0; $row < count($accounts); $row++){
-//    print "  <td><div class=action><a href=\"?action=editaccount&amp;userid=" . urlencode($details['ID']) . "&amp;accountid=" . urlencode($accounts[$row]['ID']) . "\">edit</a> <a href=\"?action=deleteaccount&amp;userid=" . urlencode($details['ID']) . "&amp;accountid=" . urlencode($accounts[$row]['ID']) . "\">delete</a></div></td><td><a href=\"http://webmail.earlsoft.co.uk/src/login.php?loginname=" . urlencode($details['Name']) . "-" . urlencode($accounts[$row]['Name']) . "\" target=\"_blank\">" . htmlspecialchars($accounts[$row]['Name']) . "</a></td><td>" . htmlspecialchars($accounts[$row]['RealName']) . "</td></tr>\n";
-    print "  <td><div class=action><a href=\"?action=editaccount&amp;userid=" . urlencode($details['ID']) . "&amp;accountid=" . urlencode($accounts[$row]['ID']) . "\">edit</a> <a href=\"?action=deleteaccount&amp;userid=" . urlencode($details['ID']) . "&amp;accountid=" . urlencode($accounts[$row]['ID']) . "\">delete</a></div></td><td>" . htmlspecialchars($accounts[$row]['Name']) . "</td><td>" . htmlspecialchars($accounts[$row]['RealName']) . "</td></tr>\n";
+  for($row = 0; $row < count($accounts); $row++) {
+    print "  <tr><td><div class=action><a href=\"?action=editaccount&amp;userid=" . urlencode($details['ID']) . "&amp;accountid=" . urlencode($accounts[$row]['ID']) . "\">edit</a> <a href=\"?action=deleteaccount&amp;userid=" . urlencode($details['ID']) . "&amp;accountid=" . urlencode($accounts[$row]['ID']) . "\">delete</a> <a href=\"chpasswd.php?userid=" . urlencode($details['ID']) . "&amp;accountid=" . urlencode($accounts[$row]['ID']) . "\">set pass</a></div></td><td>" . htmlspecialchars($accounts[$row]['Name']) . "</td><td>" . htmlspecialchars($accounts[$row]['RealName']) . "</td></tr>\n";
   }
 ?>
   </table>
 <?php
-}else{
+} else {
   print "  <p>There are no accounts</p>\n";
 }
 
-if ($_REQUEST['action'] == "editaccount"){
+if ($_REQUEST['action'] == "editaccount") {
   $account = execute("SELECT Name, RealName FROM Accounts WHERE ID = " . mysql_escape_string($_REQUEST['accountid']) . " ORDER BY Name;");
 ?>
   <form action="accounts.php" method="POST">
@@ -70,7 +69,7 @@ if ($_REQUEST['action'] == "editaccount"){
    </table>
   </form>
 <?php
-}else{
+} else {
 ?>
   <form action="accounts.php" method="POST">
    <input name="action" type="hidden" value="addaccount">

@@ -30,7 +30,7 @@ X  0.03
  * Added a Servers.FullName field to contain the fully qualified server name
  * Updated the schema
  * Added fully qualified name to the Servers form
- * Removed the @ from most of the mysql functions as it is unnecassary
+ * Removed the @ from most of the MySQL functions as it is unnecessary
  * Changed the diff nesting in updatemail
  * Moved the "restarting sendmail" line to before it restarts sendmail
 
@@ -47,7 +47,7 @@ X  0.04
  * Updated the schema
  * Add a Live and Shell options to the server settings page
  * Add code to not do any updates if Servers.Live is not set
- * Added the mod_rewrite rules to the update web script when a webiste redirects elsewhere
+ * Added the mod_rewrite rules to the update web script when a website redirects elsewhere
 X  0.05
 
 08/04/2003
@@ -56,7 +56,7 @@ X  0.05
 24/04/2003
  * Moved the opening of config files to another function in a common file
  * Created a diff function to tell if 2 files have changed
- * Made the openconfig function check for the existence of the .static files before continuing and copy the live config to .static if they dont
+ * Made the openconfig function check for the existence of the .static files before continuing and copy the live config to .static if they don't
 X  0.06
 
 27/04/2003
@@ -133,7 +133,82 @@ X  0.10
  * Removed the "administer account" link when hosting is disabled for a user
  * Added a Radius server capability
  * Fixed the default httpd.conf path
- * Appended a . onto the end of fully qualified CNAME hosts (names containign a .)
+ * Appended a . onto the end of fully qualified CNAME hosts (names containing a .)
  * Disabled certain account admin options when there are no servers with that capability
  * Added a config option for DNS hostmaster
 X  0.11
+
+08/11/2003
+ * Removed the concept of a website trial
+ * Added a Notes column to the website list showing redirections
+ * Added a website dropdown when adding/editing a host alias
+
+09/11/2002
+ * Tidied up some of the existing PHP
+
+10/11/2003
+ * Tidied up and fixed some HTML errors
+ * Fixed some incorrect relative links 
+ * Added an account dropdown when adding/editing a mail address
+
+11/11/2003
+ * Added code to show the mailbox name instead of the ID
+ * Fixed a bug in the domain page where it used the data selected in the hidden account/website list
+ * Removed all the help links in lieu of moving to a new help system and adding a help CSS class
+ * Changed the default catchall to point at the main user account
+
+22/11/2003
+ * Changed the virtusertable entries to not conflict with the accounts
+ * Added code to point account aliases at the specified account
+ * Made it use the servers name for the FTP URLs on the website page rather than hard coded to jerry.earlsoft
+
+23/11/2003
+ * Added code to create mail accounts
+
+08/12/2003
+ * Fixed some typos in the domain lookup page
+
+12/12/2003
+ * Inserted commas between the recipients of an alias
+
+14/12/2003
+ * Added the server ID field to the lists table and pages
+ * Added a realname field and code to create the aliases on the mail server
+
+17/12/2003
+ * Added an option to show the full whois info on the domain lookup page
+
+18/12/2003
+ * Added code to lookup a range of TLDs if one isn't specified in the domain lookup page
+ * Added preliminary code to handle .org whois formats
+
+19/12/2003
+ * Created a "contrib" file to upload secondaried domains to Gradwell
+
+21/12/2003
+ * Added a "list" option to the email aliases
+ * Added code to point list aliases at listname@listhostaddress
+
+28/12/2003
+ * Tidied up some more PHP code
+ * Tidied up some of the global variables
+ * Replaced the isadmin function with a session variable
+
+30/12/2003
+ * Started writing the help documentation
+ * Swapped the "System administration" and "tools" links on the home page
+
+18/01/2004
+ * Switched to the recommended way of specifiing apache virtualhosts
+
+26/01/2004
+ * Added a "contrib" system to run arbitrary scripts
+ * Added a filed to say when the password was updated
+ * Added a "last updated" field to the servers table
+ * Made the gradwell upload and log script creation, contribs
+ * Moved the mail account creation code to updatemail
+ * Added code to handle password changes, handle accounts being disabled, as well as name changes
+
+12/01/2004
+ * Added a "change mail account password" option
+X  0.12

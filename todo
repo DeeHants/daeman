@@ -1,15 +1,10 @@
 DaeManFE
  * Add very extensive input checking
- * Disable options that dont apply because of other settings
  * Disable forms for users that don't have hosted accounts
  * Add LOADS of comments
- * Optimise SQL queries
  * Rewrite the forms to use mysql_query instead of the execute function
 
 DaeManD
- * Use fully qualified names from the database instead of hard coded
  * Add LOADS of comments
- * Add code to edit existing user accounts
  * Write scripts to update MySQLs users
  * Write scripts to update Mailman lists
- * Optimise SQL queries

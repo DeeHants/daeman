@@ -21,29 +21,33 @@ for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
 
     $zonefile = fopen($DNSZones . $domain['Name'] . ".zone.new", "a");
     fputs($zonefile, "\$TTL\t43200\n");
-    fputs($zonefile, "@\t\tIN\tSOA\t" . $localservername . ".\tdean.earlsoft.co.uk. (\n");
-    fputs($zonefile, "\t\t\t" . $serial . " ; serial\n");
-    fputs($zonefile, "\t\t\t3600 ; refresh\n");
-    fputs($zonefile, "\t\t\t900 ; retry\n");
-    fputs($zonefile, "\t\t\t1209600 ; expire\n");
-    fputs($zonefile, "\t\t\t43200 ; default_ttl\n");
-    fputs($zonefile, "\t\t\t)\n");
+    fputs($zonefile, "@\tIN\tSOA\t" . $localservername . ".\t" . str_replace("@", ".", $DNSHostmasterEmail) . ". (\n");
+    fputs($zonefile, "\t\t" . $serial . " ; serial\n");
+    fputs($zonefile, "\t\t3600 ; refresh\n");
+    fputs($zonefile, "\t\t900 ; retry\n");
+    fputs($zonefile, "\t\t1209600 ; expire\n");
+    fputs($zonefile, "\t\t43200 ; default_ttl\n");
+    fputs($zonefile, "\t\t)\n");
     fputs($zonefile, "\n");
 
-    fputs($zonefile, "@\t\tIN\tNS\t" . $localservername . ".\n");
+    fputs($zonefile, "@\tIN\tNS\t" . $localservername . ".\n");
     for ($serverid = 0; $serverid < count($ServersBackupNS); $serverid++) {
-      fputs($zonefile, "@\t\tIN\tNS\t" . $ServersBackupNS[$serverid] . ".\n");
+      fputs($zonefile, "@\tIN\tNS\t" . $ServersBackupNS[$serverid] . ".\n");
     }
     fputs($zonefile, "\n");
 
     if ($domain['Mail'] == "primary") {
-      fputs($zonefile, "@\t\tIN\tMX\t5\tmail.earlsoft.co.uk.\n");
+      fputs($zonefile, "@\tIN\tMX\t5\tmail.earlsoft.co.uk.\n");
       for ($serverid = 0; $serverid < count($ServersBackupMX); $serverid++) {
-        fputs($zonefile, "@\t\tIN\tMX\t10\t" . $ServersBackupMX[$serverid] . ".\n");
+        fputs($zonefile, "@\tIN\tMX\t10\t" . $ServersBackupMX[$serverid] . ".\n");
       }
       fputs($zonefile, "\n");
+    } elseif ($domain['Mail'] == "secondary") {
+      fputs($zonefile, "@\tIN\tMX\t5\t" . $domain['MailPrimary'] . ".\n");
+      fputs($zonefile, "@\tIN\tMX\t10\tmail.earlsoft.co.uk.\n");
+      fputs($zonefile, "\n");
     } elseif ($domain['MailPrimary'] != "") {
-      fputs($zonefile, "@\t\tIN\tMX\t5\t" . $domain['MailPrimary'] . "\n");
+      fputs($zonefile, "@\tIN\tMX\t5\t" . $domain['MailPrimary'] . ".\n");
       fputs($zonefile, "\n");
     }
 

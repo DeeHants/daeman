@@ -22,7 +22,7 @@ function execute($sql) {
   if (ereg ("^[U,u]", $sql)) {
     if ($rst) {
       return true;
-    }else {
+    } else {
       return false;
     }
   }
@@ -31,7 +31,7 @@ function execute($sql) {
   if (ereg ("^[D,d]", $sql)) {
     if ($rst) {
       return true;
-    }else {
+    } else {
       return false;
     }
   }

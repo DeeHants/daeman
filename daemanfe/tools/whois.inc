@@ -48,7 +48,7 @@ function parse_whois($data) {
       }
       
     } else {
-      if (substr($line, 0, 12) == "No match for") { $info["registered"] = 0; }
+      if (substr($line, 0, 12) == "No match for") { $info["registered"] = 0; $info["domain"] = trim(substr($line, 14, -2)); }
       if ($line == "Domain Name:") { $info["registered"] = 1; $next = "domain"; }
       if (substr($line, 0, 12) == "Domain Name:") { $info["registered"] = 1; $info["domain"] = trim(substr($line, 12)); }
       if ($line == "Registrant:") { $next = "registrant.name"; }
@@ -61,15 +61,18 @@ function parse_whois($data) {
       if (substr($line, 0, 13) == "Referral URL:") { $info["agent.url"] = trim(substr($line, 13)); }
       if (substr($line, 0, 14) == "Registered on:") { $info["date.registered"] = strtotime(trim(substr($line, 14))); }
       if (substr($line, 0, 14) == "Creation Date:") { $info["date.registered"] = strtotime(trim(substr($line, 14))); }
+      if (substr($line, 0, 11) == "Created On:") { $info["date.registered"] = strtotime(trim(substr($line, 11))); }
       if (substr($line, 0, 13) == "Renewal Date:") { $info["date.renewal"] = strtotime(trim(substr($line, 13))); }
       if (substr($line, 0, 16) == "Expiration Date:") { $info["date.renewal"] = strtotime(trim(substr($line, 16))); }
       if (substr($line, 0, 13) == "Last updated:") { $info["date.updated"] = strtotime(trim(substr($line, 13))); }
+      if (substr($line, 0, 16) == "Last Updated On:") { $info["date.updated"] = strtotime(trim(substr($line, 16))); }
       if (substr($line, 0, 13) == "Updated Date:") { $info["date.updated"] = strtotime(trim(substr($line, 13))); }
       if ($line == "Registration Status:") { $next = "status"; }
       if (substr($line, 0, 7) == "Status:") { $info["status"] = trim(substr($line, 7)); }
-      if ($line == "--") { $next = "regtistrar"; }
+      if ($line == "--") { $next = "registrar"; }
     }
   }
+  $info['data'] = $data;
   return $info;
 }
 ?>

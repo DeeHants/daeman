@@ -6,7 +6,25 @@ $userfile = openconfig($MailVirtUserTable);
 $relayfile = openconfig($MailRelayDomains);
 $mailerfile = openconfig($MailMailerTable);
 
-$domains = mysql_query ("SELECT Domains.ID, Domains.Name, DomainName, Mail, MailPrimary FROM Domains LEFT JOIN Users ON Users.ID = Domains.UserID WHERE Users.Enabled=1 AND Users.Hosting=1 AND Domains.Enabled=1 AND Mail <> 'none' AND MailServerID='" . mysql_escape_string($localserverid) . "' ORDER BY DomainName;", $link);
+$lists = mysql_query("SELECT Lists.ID, Lists.Name FROM Lists LEFT JOIN Users ON Users.ID = Lists.UserID WHERE Users.Enabled=1 AND Users.Hosting=1 AND ServerID='" . mysql_escape_string($localserverid) . "' ORDER BY Lists.Name;", $link);
+for ($listid = 0; $listid < mysql_num_rows($lists); $listid++) {
+  $list = mysql_fetch_array($lists);
+
+//  fputs($hostnamefile, $ListHostAddress . "\n");
+
+  fputs($userfile, "\n");
+  fputs($userfile, $list['Name'] . "@" . $ListHostAddress . "\tlist-" . $list['Name'] . "\n");
+  fputs($userfile, $list['Name'] . "-request@" . $ListHostAddress . "\tlist-" . $list['Name'] . "-request\n");
+  fputs($userfile, $list['Name'] . "-admin@" . $ListHostAddress . "\tlist-" . $list['Name'] . "-admin\n");
+  fputs($userfile, $list['Name'] . "-owner@" . $ListHostAddress . "\tlist-" . $list['Name'] . "-admin\n");
+
+  fputs($aliasfile, "\n");
+  fputs($aliasfile, "list-" . $list['Name'] . ":\t\"|/var/mailman/mail/wrapper post " . $list['Name'] . "\"\n");
+  fputs($aliasfile, "list-" . $list['Name'] . "-request:\t\"|/var/mailman/mail/wrapper mailcmd " . $list['Name'] . "\"\n");
+  fputs($aliasfile, "list-" . $list['Name'] . "-admin:\t\"|/var/mailman/mail/wrapper mailowner " . $list['Name'] . "\"\n");
+}
+
+$domains = mysql_query("SELECT Domains.ID, Domains.Name, DomainName, Mail, MailPrimary, Users.Name AS UserName FROM Domains LEFT JOIN Users ON Users.ID = Domains.UserID WHERE Users.Enabled=1 AND Users.Hosting=1 AND Domains.Enabled=1 AND Mail <> 'none' AND MailServerID='" . mysql_escape_string($localserverid) . "' ORDER BY DomainName;", $link);
 for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
   $domain = mysql_fetch_array($domains);
 
@@ -21,7 +39,7 @@ for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
       $alias = mysql_fetch_array($aliases);
       if ($alias['Type'] == "address") {
         fputs($aliasfile, $domain['Name']);
-        if ($alias['Name'] != "") { fputs($aliasfile, "-" . $alias['Name']); } else { $addeddefault = true; }
+        if ($alias['Name'] != "") { fputs($aliasfile, "_" . $alias['Name']); } else { $addeddefault = true; }
         fputs($aliasfile, ":\t");
 
         $emails = split(",", $alias['Data']);
@@ -34,16 +52,41 @@ for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
           if ($email < (count($emails) - 1)) { fputs($aliasfile, ", "); }
         }
         fputs($aliasfile, "\n");
+
+      } elseif ($alias['Type'] == "account") {
+        fputs($aliasfile, $domain['Name']);
+        if ($alias['Name'] != "") { fputs($aliasfile, "_" . $alias['Name']); } else { $addeddefault = true; }
+        fputs($aliasfile, ":\t");
+
+        fputs($aliasfile, $domain['UserName'] . "-");
+        $accounts = mysql_query("SELECT Name FROM Accounts WHERE ID='" . mysql_escape_string($alias['Data']) . "';", $link);
+//        print "SELECT Name FROM Accounts WHERE ID='" . mysql_escape_string($alias['Data']) . "';\n";
+        $account = mysql_fetch_array($accounts);
+        fputs($aliasfile, $account['Name']);
+        mysql_free_result($accounts);
+	
+        fputs($aliasfile, "\n");
+      } elseif ($alias['Type'] == "list") {
+        fputs($aliasfile, $domain['Name']);
+        if ($alias['Name'] != "") { fputs($aliasfile, "_" . $alias['Name']); } else { $addeddefault = true; }
+        fputs($aliasfile, ":\t");
+
+        $lists = mysql_query("SELECT Name FROM Lists WHERE ID='" . mysql_escape_string($alias['Data']) . "';", $link);
+        $list = mysql_fetch_array($lists);
+        fputs($aliasfile, $list['Name'] . "@" . $ListHostAddress);
+        mysql_free_result($lists);
+	
+        fputs($aliasfile, "\n");
       }
 
       fputs($userfile, $alias['Name'] . "@" . $domain['DomainName'] . "\t" . $domain['Name']);
-      if ($alias['Name'] != "") { fputs($userfile, "-" . $alias['Name']); }
+      if ($alias['Name'] != "") { fputs($userfile, "_" . $alias['Name']); }
       fputs($userfile, "\n");
     }
     mysql_free_result($aliases);
 
     if (!$addeddefault) {
-      fputs($aliasfile, $domain['Name'] . ":\tdevnull\n");
+      fputs($aliasfile, $domain['Name'] . ":\t" . $domain['UserName'] . "\n");
       fputs($userfile, "@" . $domain['DomainName'] . "\t" . $domain['Name'] . "\n");
     }
 
@@ -88,4 +131,20 @@ if ($changed == 0) {
   print "Restarting sendmail\n";
   system($MailSendmailInit . " restart >/dev/null");
 }
+
+// Set up mail account users
+$accounts = mysql_query("SELECT Users.Name AS UserName, Accounts.Name, Accounts.AccountID, Accounts.Password, Accounts.RealName FROM Accounts LEFT JOIN Users ON Users.ID=Accounts.UserID WHERE Users.Enabled ORDER BY AccountID;", $link);
+for ($accountid = 0; $accountid < mysql_num_rows($accounts); $accountid++)
+{
+  $account = mysql_fetch_array($accounts);
+
+  exec("grep /etc/passwd -ie '" . $account['UserName'] . "-" . $account['Name'] . "'", $output, $ecode);
+  if ($ecode == 1) {
+    print "Creating account " . $account['Name'] . " for " . $account['UserName'] . "\n";
+    system("/sbin/useradd -u " . $account['AccountID'] . " -s '/sbin/nologin' -c '" . $account['RealName'] . "' -p '" . $account['Password'] . "' " . $account['UserName'] . "-" . $account['Name']);
+  } else {
+    //user exists, update!!!
+  }
+}
+mysql_free_result($accounts);
 ?>

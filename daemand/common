@@ -14,4 +14,12 @@ function diff($filename) {
   exec("diff --brief " . $filename . ".new " . $filename, $output, $changed);
   return ($changed != 0);
 }
+
+function mysql_to_date($datestr) {
+  list($date, $time) = split(' ', trim($datestr));
+  list($year, $month, $day) = split('-', $date);
+  list($hours, $mins, $seconds) = split(':', $time);
+  $unixtime = mktime($hours, $mins, $seconds, $month, $day, $year);
+  return $unixtime;
+}
 ?>
