@@ -1,15 +1,10 @@
 <?php
 // Copy the static config files and open them for appending
-copy($MailLocalHostNames . ".static", $MailLocalHostNames . ".new");
-$hostnamefile = fopen($MailLocalHostNames . ".new", "a");
-copy($MailAliases . ".static", $MailAliases . ".new");
-$aliasfile = fopen($MailAliases . ".new", "a");
-copy($MailVirtUserTable . ".static", $MailVirtUserTable . ".new");
-$userfile = fopen($MailVirtUserTable . ".new", "a");
-copy($MailRelayDomains . ".static", $MailRelayDomains . ".new");
-$relayfile = fopen($MailRelayDomains . ".new", "a");
-copy($MailMailerTable . ".static", $MailMailerTable . ".new");
-$mailerfile = fopen($MailMailerTable . ".new", "a");
+$hostnamefile = openconfig($MailLocalHostNames);
+$aliasfile = openconfig($MailAliases);
+$userfile = openconfig($MailVirtUserTable);
+$relayfile = openconfig($MailRelayDomains);
+$mailerfile = openconfig($MailMailerTable);
 
 $domains = mysql_query ("SELECT Domains.ID, Domains.Name, DomainName, Mail, MailPrimary FROM Domains LEFT JOIN Users ON Users.ID = Domains.UserID WHERE Users.Enabled=1 AND Users.Hosting=1 AND Domains.Enabled=1 AND Mail <> 'none' AND MailServerID='" . mysql_escape_string($localserverid) . "' ORDER BY DomainName;", $link);
 for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
@@ -63,10 +58,7 @@ fclose($userfile);
 fclose($relayfile);
 fclose($mailerfile);
 
-exec("diff --brief " . $MailVirtUserTable . ".new " . $MailVirtUserTable, $output, $changed);
-if ($changed == 0) { exec("diff --brief " . $MailAliases . ".new " . $MailAliases, $output, $changed); }
-if ($changed == 0) { exec("diff --brief " . $MailRelayDomains . ".new " . $MailRelayDomains, $output, $changed); }
-if ($changed == 0) { exec("diff --brief " . $MailMailerTable . ".new " . $MailMailerTable, $output, $changed); }
+$changed = diff($MailVirtUserTable) || diff($MailAliases) || diff($MailRelayDomains) || diff($MailMailerTable);
 
 if ($changed == 0) {
   unlink($MailVirtUserTable . ".new");

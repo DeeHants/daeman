@@ -1,3 +1,12 @@
+X  0.06
+ * Made the openconfig function check for the existence of the .static files before continuing and copy the live config to .static if they dont
+ * Created a diff function to tell if 2 files have changed
+ * Moved the opening of config files to another function in a common file
+24/04/2003
+
+ * Made it update DNS before Mail
+08/04/2003
+
 X  0.05
  * Added the mod_rewrite rules to the update web script when a webiste redirects elsewhere
  * Add code to not do any updates if Servers.Live is not set

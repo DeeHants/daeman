@@ -1,0 +1,17 @@
+<?php
+// a few common functions used by the daeman scripts
+function openconfig($filename) {
+  if (!file_exists($filename . ".static")) {
+    copy($filename, $filename . ".static");
+    system("chmod --reference " . $filename . " " . $filename . ".static");
+  }
+  copy($filename . ".static", $filename . ".new");
+  $filenum = fopen($filename . ".new", "a");
+  return $filenum;
+}
+
+function diff($filename) {
+  exec("diff --brief " . $filename . ".new " . $filename, $output, $changed);
+  return ($changed != 0);
+}
+?>

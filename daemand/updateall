@@ -1,6 +1,7 @@
 #!/usr/bin/php -q
 <?php
 require("config");
+require("common");
 
 // Connect to the central MySQL server and exit if it cant
 $link = @mysql_connect ($DBHost, $DBUsername, $DBPassword);
@@ -25,8 +26,8 @@ if (mysql_num_rows($servers) == 0) {
 
     // Update everything as necessary
     include("updateusers");
-    if ($server['Mail']) { include("updatemail"); }
     if ($server['DNS']) { include("updatedns"); }
+    if ($server['Mail']) { include("updatemail"); }
     if ($server['HTTP']) { include("updateweb"); }
   }
 }

@@ -11,5 +11,4 @@ DaeManD
  * Add LOADS of comments
  * Write scripts to update user accounts
  * Write scripts to update MySQLs users
- * Check for the existence of the .static files before continuing and copy the live config to .static if they dont.
  * Optimise SQL queries

@@ -1,6 +1,5 @@
 <?php
-copy($HTTPConfig . ".static", $HTTPConfig . ".new");
-$configfile = fopen($HTTPConfig . ".new", "a");
+$configfile = openconfig($HTTPConfig);
 
 $websites = mysql_query("SELECT Websites.ID, Websites.Name, Trial, Logging, Redirect, Users.Name AS UserName FROM Websites LEFT JOIN Users ON Users.ID = Websites.UserID WHERE Enabled=1 AND Hosting=1 AND ServerID='" . mysql_escape_string($localserverid) . "' ORDER BY Name;", $link);
 for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
@@ -99,7 +98,7 @@ mysql_free_result($websites);
 
 fclose($configfile);
 
-exec("diff --brief " . $HTTPConfig . ".new " . $HTTPConfig, $output, $changed);
+$changed = diff($HTTPConfig);
 
 if ($changed == 0) {
   unlink($HTTPConfig . ".new");

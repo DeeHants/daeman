@@ -6,10 +6,6 @@ running on several distributed servers.
 
 WARNING
 
-Make copies of all the config files mentioned in the DaeMan config file 
-and call them filename.static. The DaeMan scripts will use these as the 
-base for the auto generated config files before it overwrites the originals 
-
 Installation
 
 The schema.sql is the schema for the database used by DaeMan. It will 
@@ -25,10 +21,14 @@ The daemand scripts all need to be in the same directory, and the
 updateall script can be run via cron as it will only restart services if 
 necessary.
 
-The config files can be shared between the website and update scripts.
+The DaeMan scripts will need to use a base file for all the config, and it
+will copy your existing config files to .static and use them as the base
+for the auto generated config files before it overwrites the originals
+
+The DaeMan config files can be shared between the website and update 
+scripts.
 
 Other
 
 Author: Dean Earley (dean@earlsoft.co.uk)
 Project page: http://sourceforge.net/projects/daeman/
-
