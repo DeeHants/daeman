@@ -12,13 +12,13 @@ print_header("Hosted domains: " . htmlspecialchars($details['Name']));
 if (isset($action)){
   if (userisadmin($currentuserid)) {
     if ($action == "adddomain"){
-      if (execute("INSERT INTO Domains (UserID, Name, DomainName, Registrar, Expiry, Enabled, DNS, DNSPrimary, Mail, MailPrimary) VALUES ('" . mysql_escape_string($userid) . "', '" . mysql_escape_string($name) . "', '" . mysql_escape_string($domainname) . "', '" . mysql_escape_string($registrar) . "', '" . mysql_escape_string($expiry) . "', '" . mysql_escape_string($enabled) . "', '" . mysql_escape_string($dns) . "', '" . mysql_escape_string($dnsprimary) . "', '" . mysql_escape_string($mail) . "', '" . mysql_escape_string($mailprimary) . "');")){
+      if (execute("INSERT INTO Domains (UserID, Name, DomainName, Registrar, Expiry, Enabled, DNS, DNSPrimary, DNSServerID, Mail, MailPrimary, MailServerID) VALUES ('" . mysql_escape_string($userid) . "', '" . mysql_escape_string($name) . "', '" . mysql_escape_string($domainname) . "', '" . mysql_escape_string($registrar) . "', '" . mysql_escape_string($expiry) . "', '" . mysql_escape_string($enabled) . "', '" . mysql_escape_string($dns) . "', '" . mysql_escape_string($dnsprimary) . "', '" . mysql_escape_string($dnsserverid) ."', '" . mysql_escape_string($mail) . "', '" . mysql_escape_string($mailprimary) . "', '" . mysql_escape_string($mailserverid) ."');")){
         print "  <p class=status>Domain added successfully.</p>\n";
       }else{
         print "  <p class=error>Error adding domain.</p>\n";
       }
     }elseif ($action == "updatedomain"){
-      if (execute("UPDATE Domains SET DomainName='" . mysql_escape_string($domainname) . "', Registrar='" . mysql_escape_string($registrar) . "', Expiry='" . mysql_escape_string($expiry) . "', Enabled='" . mysql_escape_string($enabled) . "', DNS='" . mysql_escape_string($dns) . "', DNSPrimary='" . mysql_escape_string($dnsprimary) . "', Mail='" . mysql_escape_string($mail) . "', MailPrimary='" . mysql_escape_string($mailprimary) . "' WHERE ID='" . mysql_escape_string($domainid) . "';")){
+      if (execute("UPDATE Domains SET DomainName='" . mysql_escape_string($domainname) . "', Registrar='" . mysql_escape_string($registrar) . "', Expiry='" . mysql_escape_string($expiry) . "', Enabled='" . mysql_escape_string($enabled) . "', DNS='" . mysql_escape_string($dns) . "', DNSPrimary='" . mysql_escape_string($dnsprimary) . "', DNSServerID='" . mysql_escape_string($dnsserverid) . "', Mail='" . mysql_escape_string($mail) . "', MailPrimary='" . mysql_escape_string($mailprimary) . "', MailServerID='" . mysql_escape_string($mailserverid) . "' WHERE ID='" . mysql_escape_string($domainid) . "';")){
         print "  <p class=status>Domain updated successfully.</p>\n";
       } else {
         print "  <p class=error>Error updating domain.".$DBError."</p>\n";
@@ -59,7 +59,7 @@ $domains = execute("SELECT ID, Name, DomainName, Expiry, Enabled, DNS, DNSPrimar
 
 if (userisadmin($currentuserid)) {
   if ($action == "editdomain"){
-    $domain = execute("SELECT DomainName, Registrar, Expiry, Enabled, DNS, DNSPrimary, Mail, MailPrimary FROM Domains WHERE ID='" . mysql_escape_string($domainid) . "';");
+    $domain = execute("SELECT DomainName, Registrar, Expiry, Enabled, DNS, DNSPrimary, DNSServerID, Mail, MailPrimary, MailServerID FROM Domains WHERE ID='" . mysql_escape_string($domainid) . "';");
 ?>
   <a name=domainform>
   <form action="domains.php" method="POST">
@@ -73,8 +73,10 @@ if (userisadmin($currentuserid)) {
     <tr><td>Enabled</td><td><input type="checkbox" name="enabled" value=1<?php if ($domain[0]['Enabled']) { print " checked"; } ?>> <a href="../help.php#domainenabled">?</a></td></tr>
     <tr><td>DNS</td><td><select name="dns"><option value="primary"<?php if($domain[0]['DNS']=="primary"){ print " selected";} ?>>Primary<option value="secondary"<?php if($domain[0]['DNS']=="secondary"){ print " selected";} ?>>Secondary<option value="none"<?php if ($domain[0]['DNS']=="none"){ print " selected";} ?>>None</select> <a href="help.php#domaindns"></td></tr>
     <tr><td>Primary DNS server</td><td><input name="dnsprimary" value="<?php print htmlspecialchars($domain[0]['DNSPrimary']); ?>"> <a href="help.php#domaindnsprimary">?</a></td></tr>
+    <tr><td>DNS Server</td><td><select name="dnsserverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE DNS=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\"" . iif($domain[0]['DNSServerID'] == $servers[$serverid]['ID'], " selected", "") . ">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#domaindnsserverid">?</a></td></tr>
     <tr><td>Mail</td><td><select name="mail"><option value="primary"<?php if($domain[0]['Mail']=="primary"){ print " selected";} ?>>Primary<option value="secondary"<?php if($domain[0]['Mail']=="secondary"){ print " selected";} ?>>Secondary<option value="none"<?php if ($domain[0]['Mail']=="none"){ print " selected";} ?>>None</select> <a href="help.php#domainmail"></td></tr>
     <tr><td>Primary mail server</td><td><input name="mailprimary" value="<?php print htmlspecialchars($domain[0]['MailPrimary']); ?>"> <a href="help.php#domainmailprimary">?</a></td></tr>
+    <tr><td>Mail Server</td><td><select name="mailserverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE Mail=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\"" . iif($domain[0]['MailServerID'] == $servers[$serverid]['ID'], " selected", "") . ">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#domainmailserverid">?</a></td></tr>
     <tr><td colspan=2 align=center><input type="submit" value="Update domain"></td></tr>
    </table>
   </form>
@@ -93,8 +95,10 @@ if (userisadmin($currentuserid)) {
     <tr><td>Enabled</td><td><input type="checkbox" name="enabled" value=1 checked> <a href="../help.php#domainenabled">?</a></td></tr>
     <tr><td>DNS</td><td><select name="dns"><option value="primary" selected>Primary<option value="secondary">Secondary<option value="none">None</select> <a href="help.php#domaindns"></td></tr>
     <tr><td>Primary DNS server</td><td><input name="dnsprimary"> <a href="help.php#domaindnsprimary">?</a></td></tr>
+    <tr><td>DNS Server</td><td><select name="dnsserverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE DNS=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#domaindnsserverid">?</a></td></tr>
     <tr><td>Mail</td><td><select name="mail"><option value="primary" selected>Primary<option value="secondary">Secondary<option value="none">None</select> <a href="help.php#domainmail"></td></tr>
     <tr><td>Primary mail server</td><td><input name="mailprimary"> <a href="help.php#domainmailprimary">?</a></td></tr>
+    <tr><td>Mail Server</td><td><select name="mailserverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE Mail=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#domainmailserverid">?</a></td></tr>
     <tr><td colspan=2 align=center><input type="submit" value="Add domain"></td></tr>
    </table>
   </form>

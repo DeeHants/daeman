@@ -1,3 +1,19 @@
+X  0.03
+ * Modified all the update scripts to only add the entries that apply to their local server
+ * Modified all the update scripts to use a common MySQL database connection
+ * Modified all the update scripts to be called using include() 
+31/03/2003
+
+ * Added Server field to Websites and Domains (for Mail and DNS)
+ * Updated the schema
+ * Renamed some indexes to make it insert without errors
+ * Removed Domains.ServerID and added MailServerID and DNSServerID
+ * Corrected some typos in the documentation
+30/03/2003
+
+ * Added caching to the isuseradmin function
+29/03/2003
+
 X  0.02
  * Added a readme file to the archive
  * Added a default user 

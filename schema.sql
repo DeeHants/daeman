@@ -10,8 +10,8 @@ CREATE TABLE Accounts (
   Password varchar(255) NOT NULL default '',
   RealName varchar(255) NOT NULL default '',
   PRIMARY KEY  (ID),
-  UNIQUE KEY UserID (AccountID),
-  UNIQUE KEY UserKey (UserID,Name),
+  UNIQUE KEY AccountKey (UserID,Name),
+  UNIQUE KEY AccountID (AccountID),
   KEY CustomerID (UserID)
 ) TYPE=MyISAM;
 # --------------------------------------------------------
@@ -27,7 +27,7 @@ CREATE TABLE Aliases (
   Type enum('account','address','sms') NOT NULL default 'account',
   Data varchar(255) NOT NULL default '',
   PRIMARY KEY  (ID),
-  UNIQUE KEY UserKey (DomainID,Name),
+  UNIQUE KEY AliasKey (DomainID,Name),
   KEY DomainID (DomainID)
 ) TYPE=MyISAM;
 # --------------------------------------------------------
@@ -46,15 +46,17 @@ CREATE TABLE Domains (
   Enabled tinyint(1) NOT NULL default '0',
   Mail enum('primary','secondary','none') NOT NULL default 'primary',
   MailPrimary varchar(255) NOT NULL default '',
+  MailServerID int(10) unsigned NOT NULL default '0',
   DNS enum('primary','secondary','none') NOT NULL default 'primary',
   DNSPrimary varchar(255) NOT NULL default '',
   DNSSerial varchar(10) NOT NULL default '',
-  ServerID int(11) unsigned NOT NULL default '0',
+  DNSServerID int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (ID),
-  UNIQUE KEY DomainName (DomainName),
   UNIQUE KEY Name (Name),
-  KEY CustomerID (UserID),
-  KEY ServerID (ServerID)
+  UNIQUE KEY DomainName (DomainName),
+  KEY UserID (UserID),
+  KEY MailServerID (MailServerID),
+  KEY DNSServerID (DNSServerID)
 ) TYPE=MyISAM;
 # --------------------------------------------------------
 
@@ -108,8 +110,8 @@ CREATE TABLE Users (
   DB tinyint(1) NOT NULL default '0',
   Notes text NOT NULL,
   PRIMARY KEY  (ID),
-  UNIQUE KEY Name (Name),
-  UNIQUE KEY UserID (AccountID)
+  UNIQUE KEY AccountID (AccountID),
+  UNIQUE KEY Name (Name)
 ) TYPE=MyISAM;
 # --------------------------------------------------------
 
@@ -140,7 +142,7 @@ CREATE TABLE Websites (
   ServerID int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (ID),
   UNIQUE KEY Name (Name),
-  KEY CustomerID (UserID),
+  KEY UserID (UserID),
   KEY ServerID (ServerID)
 ) TYPE=MyISAM;
 

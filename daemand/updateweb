@@ -1,17 +1,10 @@
-#!/usr/bin/php -q
 <?php
-require("config");
-
-$link = @mysql_connect ($DBHost, $DBUsername, $DBPassword);
-if (!$link) { exit; }
-
-mysql_select_db ($DBName, $link);
-
 copy($HTTPConfig . ".static", $HTTPConfig . ".new");
 $configfile = fopen($HTTPConfig . ".new", "a");
 
-$websites = mysql_query("SELECT Websites.ID, Websites.Name, Trial, Logging, Users.Name AS UserName FROM Websites LEFT JOIN Users ON Users.ID = Websites.UserID WHERE Enabled=1 AND Hosting=1 ORDER BY Name;", $link);
-for ($websiteid = 0; $websiteid < @mysql_num_rows($websites); $websiteid++) {
+$websites = mysql_query("SELECT Websites.ID, Websites.Name, Trial, Logging, Users.Name AS UserName FROM Websites LEFT JOIN Users ON 
+Users.ID = Websites.UserID WHERE Enabled=1 AND Hosting=1 AND ServerID='" . mysql_escape_string($localserverid) . "' ORDER BY Name;", 
+$link); for ($websiteid = 0; $websiteid < @mysql_num_rows($websites); $websiteid++) {
   $website = @mysql_fetch_array($websites);
 
   $hosts = mysql_query("SELECT ID, Host FROM WebsiteHosts WHERE WebsiteID='" . mysql_escape_string($website['ID']) . "' ORDER BY Host;", $link);
@@ -94,8 +87,6 @@ for ($websiteid = 0; $websiteid < @mysql_num_rows($websites); $websiteid++) {
 mysql_free_result($websites);
 
 fclose($configfile);
-
-mysql_close($link);
 
 exec("diff --brief " . $HTTPConfig . ".new " . $HTTPConfig, $output, $changed);
 

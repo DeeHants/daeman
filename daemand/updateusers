@@ -1,11 +1,3 @@
-#!/usr/bin/php -q
 <?php
-require("config");
 
-$link = @mysql_connect ($DBHost, $DBUsername, $DBPassword);
-if (!$link) { exit; }
-
-mysql_select_db ($DBName, $link);
-
-mysql_close($link);
 ?>

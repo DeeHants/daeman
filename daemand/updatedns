@@ -1,16 +1,8 @@
-#!/usr/bin/php -q
 <?php
-require("config");
-
-$link = @mysql_connect ($DBHost, $DBUsername, $DBPassword);
-if (!$link) { exit; }
-
-mysql_select_db ($DBName, $link);
-
 copy($DNSConfig . ".static", $DNSConfig . ".new");
 $configfile = fopen($DNSConfig . ".new", "a");
 
-$domains = mysql_query("SELECT Domains.ID, Domains.Name, DomainName, DNS, DNSPrimary, DNSSerial FROM Domains LEFT JOIN Users ON Users.ID =Domains.UserID WHERE Users.Enabled=1 AND Users.Hosting=1 AND Domains.Enabled=1 AND DNS<>'none' ORDER BY DomainName;", $link);
+$domains = mysql_query("SELECT Domains.ID, Domains.Name, DomainName, DNS, DNSPrimary, DNSSerial FROM Domains LEFT JOIN Users ON Users.ID =Domains.UserID WHERE Users.Enabled=1 AND Users.Hosting=1 AND Domains.Enabled=1 AND DNS<>'none' AND DNSServerID='" . mysql_escape_string($localserverid) . "' ORDER BY DomainName;", $link);
 for ($domainid = 0; $domainid < @mysql_num_rows($domains); $domainid++) {
   $domain = @mysql_fetch_array($domains);
 
@@ -109,8 +101,6 @@ for ($domainid = 0; $domainid < @mysql_num_rows($domains); $domainid++) {
 mysql_free_result($domains);
 
 fclose($configfile);
-
-mysql_close($link);
 
 exec("diff --brief " . $DNSConfig . ".new " . $DNSConfig, $output, $changed);
 

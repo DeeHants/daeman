@@ -25,13 +25,19 @@ function checkuserpass($username,$password){
 }
 
 function userisadmin($userid){
-  $sql = "SELECT Admin FROM Users WHERE ID='" . mysql_escape_string($userid) . "';";
-  $users = execute($sql);
-  if (count($users) > 0){
-    return ($users[0]['Admin'] == 1);
-  }else{
-    return false;
+  static $lastuserid, $lastresult;
+
+  if ($userid != $lastuserid) {
+    $lastuserid = $userid;
+    $sql = "SELECT Admin FROM Users WHERE ID='" . mysql_escape_string($userid) . "';";
+    $users = execute($sql);
+    if (count($users) > 0){
+      $lastresult = ($users[0]['Admin'] == 1);
+    }else{
+      $lastresult = false;
+    }
   }
+  return $lastresult;
 }
 
 function checkstatus(){

@@ -1,12 +1,4 @@
-#!/usr/bin/php -q
 <?php
-require("config");
-
-// Connect to the central MySQL server and exit if it cant
-$link = @mysql_connect ($DBHost, $DBUsername, $DBPassword);
-if (!$link) { exit; }
-mysql_select_db ($DBName, $link);
-
 // Copy the static config files and open them for appending
 copy($MailLocalHostNames . ".static", $MailLocalHostNames . ".new");
 $hostnamefile = fopen($MailLocalHostNames . ".new", "a");
@@ -19,7 +11,7 @@ $relayfile = fopen($MailRelayDomains . ".new", "a");
 copy($MailMailerTable . ".static", $MailMailerTable . ".new");
 $mailerfile = fopen($MailMailerTable . ".new", "a");
 
-$domains = mysql_query ("SELECT Domains.ID, Domains.Name, DomainName, Mail, MailPrimary FROM Domains LEFT JOIN Users ON Users.ID = Domains.UserID WHERE Users.Enabled=1 AND Users.Hosting=1 AND Domains.Enabled=1 AND Mail <> 'none' ORDER BY DomainName;", $link);
+$domains = mysql_query ("SELECT Domains.ID, Domains.Name, DomainName, Mail, MailPrimary FROM Domains LEFT JOIN Users ON Users.ID = Domains.UserID WHERE Users.Enabled=1 AND Users.Hosting=1 AND Domains.Enabled=1 AND Mail <> 'none' AND MailServerID='" . mysql_escape_string($localserverid) . "' ORDER BY DomainName;", $link);
 for ($domainid = 0; $domainid < @mysql_num_rows($domains); $domainid++) {
   $domain = @mysql_fetch_array($domains);
 
@@ -70,8 +62,6 @@ fclose($aliasfile);
 fclose($userfile);
 fclose($relayfile);
 fclose($mailerfile);
-
-mysql_close($link);
 
 exec("diff --brief " . $MailVirtUserTable . ".new " . $MailVirtUserTable, $output, $changed);
 if ($changed == 0) {

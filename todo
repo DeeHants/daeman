@@ -1,10 +1,12 @@
 DaeManFE
- * Disable forms for users that dont have hosted accounts
- * Add server options for domains, mail, and websites
+ * Disable forms for users that don't have hosted accounts
  * Add LOADS of comments
+ * Optimise SQL queries
+ * Rewrite the forms to use mysql_query instead of the execute function
 
 DaeManD
- * Make them honour the ServerID field
  * Add LOADS of comments
  * Write scripts to update user accounts
  * Write scripts to update MySQLs users
+ * Check for the existence of the .static files before continuing (stop or use blanks?)
+ * Optimise SQL queries
