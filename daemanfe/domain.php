@@ -3,7 +3,7 @@ require("common.inc");
 
 checkstatus();
 
-$ddetails = domaindetails($domainid, $domainname, $domaintitle);
+$ddetails = domaindetails($_REQUEST['domainid'], $_REQUEST['domainname']);
 if (!$ddetails){
   checkstatus();
   print "This is not a valid domain<br>\n";
@@ -11,51 +11,51 @@ if (!$ddetails){
 }
 checkstatus();
 
-print_header("Hosted domain: " . htmlspecialchars($domainname));
+print_header("Hosted domain: " . htmlspecialchars($ddetails['DomainName']));
 ?>
-  <h3><a href="index.php">Home</a> - <a href="user.php?userid=<?php print urlencode($userid); ?>">Account</a> - <a href="domains.php?userid=<?php print urlencode($userid); ?>">Domains</a> - <?php print htmlspecialchars($domainname); ?></h3>
+  <h3><a href="index.php">Home</a> - <a href="user.php?userid=<?php print urlencode($details['ID']); ?>">Account</a> - <a href="domains.php?userid=<?php print urlencode($details['ID']); ?>">Domains</a> - <?php print htmlspecialchars($ddetails['DomainName']); ?></h3>
 <?php
 
-if (isset($action)){
-  if ($action == "addalias"){
+if (isset($_REQUEST['action'])){
+  if ($_REQUEST['action'] == "addalias"){
 /*
-    if ($type == "address" && $data == "") {
+    if ($_REQUEST['type'] == "address" && $_REQUEST['data'] == "") {
       print "  <p class=error>You need to specifiy an address destination.</p>\n";
-      $action = "correctalias";
+      $_REQUEST['action'] = "correctalias";
       break;
     }
 */
-    if (execute("INSERT INTO Aliases (DomainID, Name, Type, Data) VALUES ('" . mysql_escape_string($domainid) . "', '" . mysql_escape_string($name) . "', '" . mysql_escape_string($type) . "', '" . mysql_escape_string($data) . "');")){
+    if (execute("INSERT INTO Aliases (DomainID, Name, Type, Data) VALUES ('" . mysql_escape_string($ddetails['ID']) . "', '" . mysql_escape_string($_REQUEST['name']) . "', '" . mysql_escape_string($_REQUEST['type']) . "', '" . mysql_escape_string($_REQUEST['data']) . "');")){
       print "  <p class=status>Email alias added successfully.</p>\n";
     }else{
       print "  <p class=error>Error adding email alias.</p>\n";
     }
-  }elseif ($action == "updatealias"){
-    if (execute("UPDATE Aliases SET Name='" . mysql_escape_string($name) . "', Type='" . mysql_escape_string($type) . "', Data='" . mysql_escape_string($data) . "' WHERE ID='" . mysql_escape_string($aliasid) . "';")){
+  }elseif ($_REQUEST['action'] == "updatealias"){
+    if (execute("UPDATE Aliases SET Name='" . mysql_escape_string($_REQUEST['name']) . "', Type='" . mysql_escape_string($_REQUEST['type']) . "', Data='" . mysql_escape_string($_REQUEST['data']) . "' WHERE ID='" . mysql_escape_string($_REQUEST['aliasid']) . "';")){
       print "  <p class=status>Email alias updated successfully.</p>\n";
     }else{
       print "  <p class=error>Error updating email alias.</p>\n";
     }
-  }elseif ($action == "deletealias"){
-    if (execute("DELETE FROM Aliases WHERE ID='" . mysql_escape_string($aliasid) . "';")){
+  }elseif ($_REQUEST['action'] == "deletealias"){
+    if (execute("DELETE FROM Aliases WHERE ID='" . mysql_escape_string($_REQUEST['aliasid']) . "';")){
       print "  <p class=status>Email alias deleted successfully.</p>\n";
     }else{
       print "  <p class=error>Error deleting email alias.</p>\n";
     }
-  }elseif ($action == "addhost"){
-    if (execute("INSERT INTO Hosts (DomainID, Name, Type, Data) VALUES ('" . mysql_escape_string($domainid) . "', '" . mysql_escape_string($name) . "', '" . mysql_escape_string($type) . "', '" . mysql_escape_string($data) . "');")){
+  }elseif ($_REQUEST['action'] == "addhost"){
+    if (execute("INSERT INTO Hosts (DomainID, Name, Type, Data) VALUES ('" . mysql_escape_string($ddetails['ID']) . "', '" . mysql_escape_string($_REQUEST['name']) . "', '" . mysql_escape_string($_REQUEST['type']) . "', '" . mysql_escape_string($_REQUEST['data']) . "');")){
       print "  <p class=status>Host added successfully.</p>\n";
     }else{
       print "  <p class=error>Error adding host.</p>\n";
     }
-  }elseif ($action == "updatehost"){
-    if (execute("UPDATE Hosts SET Name='" . mysql_escape_string($name) . "', Type='" . mysql_escape_string($type) . "', Data='" . mysql_escape_string($data) . "' WHERE ID='" . mysql_escape_string($hostid) . "';")){
+  }elseif ($_REQUEST['action'] == "updatehost"){
+    if (execute("UPDATE Hosts SET Name='" . mysql_escape_string($_REQUEST['name']) . "', Type='" . mysql_escape_string($_REQUEST['type']) . "', Data='" . mysql_escape_string($_REQUEST['data']) . "' WHERE ID='" . mysql_escape_string($_REQUEST['hostid']) . "';")){
       print "  <p class=status>Host updated successfully.</p>\n";
     }else{
       print "  <p class=error>Error updating Host.</p>\n";
     }
-  }elseif ($action == "deletehost"){
-    if (execute("DELETE FROM Hosts WHERE ID='" . mysql_escape_string($hostid) . "';")){
+  }elseif ($_REQUEST['action'] == "deletehost"){
+    if (execute("DELETE FROM Hosts WHERE ID='" . mysql_escape_string($_REQUEST['hostid']) . "';")){
       print "  <p class=status>Host deleted successfully.</p>\n";
     }else{
       print "  <p class=error>Error deleting host.</p>\n";
@@ -66,7 +66,7 @@ if (isset($action)){
   <h2>Email aliases</h2>
 <?php
 if ($ddetails['Mail'] == "primary") {
-  $aliases = execute("SELECT ID, Name, Type, Data FROM Aliases WHERE DomainID='" . mysql_escape_string($domainid) . "' ORDER BY Name;");
+  $aliases = execute("SELECT ID, Name, Type, Data FROM Aliases WHERE DomainID='" . mysql_escape_string($ddetails['ID']) . "' ORDER BY Name;");
 
   if ($aliases){
 ?>
@@ -74,11 +74,11 @@ if ($ddetails['Mail'] == "primary") {
    <tr><th>Actions</th><th>Address</th><th>Type</th><th>Destination</th></tr>
 <?php
     for($row = 0; $row < count($aliases); $row++){
-      print "   <tr><td><div class=action><a href=\"?action=editalias&amp;domainid=" . urlencode($domainid) . "&amp;aliasid=" . urlencode($aliases[$row]['ID']) . "#aliasform\">edit</a> <a href=\"?action=deletealias&amp;domainid=" . urlencode($domainid) . "&amp;aliasid=" . urlencode($aliases[$row]['ID']) . "\">delete</a></div></td><td>";
+      print "   <tr><td><div class=action><a href=\"?action=editalias&amp;domainid=" . urlencode($ddetails['ID']) . "&amp;aliasid=" . urlencode($aliases[$row]['ID']) . "#aliasform\">edit</a> <a href=\"?action=deletealias&amp;domainid=" . urlencode($ddetails['ID']) . "&amp;aliasid=" . urlencode($aliases[$row]['ID']) . "\">delete</a></div></td><td>";
       if ($aliases[$row]['Name'] == ""){
         print "Default";
       }else{
-        print "<a href=\"mailto:" . urlencode($aliases[$row]['Name']) . "@" . urlencode($domainname) . "\">" . htmlspecialchars($aliases[$row]['Name']) ."</a>";
+        print "<a href=\"mailto:" . urlencode($aliases[$row]['Name']) . "@" . urlencode($ddetails['DomainName']) . "\">" . htmlspecialchars($aliases[$row]['Name']) ."</a>";
       }
       print "</td><td>";
       if ($aliases[$row]['Type'] == "account"){
@@ -88,8 +88,7 @@ if ($ddetails['Mail'] == "primary") {
         $emails = split(",", $aliases[$row]['Data']);
         for ($email = 0; $email < count($emails); $email++){
           $emails[$email] = str_replace(" ", "", $emails[$email]);
-          if (!strstr($emails[$email], "@")) { $emails[$email] = $emails[$email] ."@" . $domainname; }
-          print "<a href=\"mailto:" . urlencode($emails[$email]) . "\">" . htmlspecialchars($emails[$email]) . "</a> ";
+          print "<a href=\"mailto:" . urlencode(iif(strstr($emails[$email], "@"), $emails[$email], $emails[$email] . "@" . $ddetails['DomainName'])) . "\">" . htmlspecialchars($emails[$email]) . "</a> ";
         }
         print "</td></tr>\n";
       }
@@ -101,14 +100,14 @@ if ($ddetails['Mail'] == "primary") {
     print "  <p>There are no email aliases</p>\n";
   }
 
-  if ($action == "editalias"){
-    $alias = execute("SELECT Name, Type, Data FROM Aliases WHERE ID='" . mysql_escape_string($aliasid) . "';");
+  if ($_REQUEST['action'] == "editalias"){
+    $alias = execute("SELECT Name, Type, Data FROM Aliases WHERE ID='" . mysql_escape_string($_REQUEST['aliasid']) . "';");
 ?>
   <a name=aliasform>
   <form action="domain.php" method="POST">
    <input name="action" type="hidden" value="updatealias">
-   <input name="domainid" type="hidden" value="<?php print htmlspecialchars($domainid); ?>">
-   <input name="aliasid" type="hidden" value="<?php print htmlspecialchars($aliasid); ?>">
+   <input name="domainid" type="hidden" value="<?php print htmlspecialchars($ddetails['ID']); ?>">
+   <input name="aliasid" type="hidden" value="<?php print htmlspecialchars($_REQUEST['aliasid']); ?>">
    <table>
     <tr><td>Address name</td><td><input name="name" value="<?php print htmlspecialchars($alias[0]['Name']); ?>"> <a href="help.php#aliasname">?</a></td></tr>
     <tr><td>Address type</td><td><select name="type"><option value="account"<?php if($alias[0]['Type']=="account"){ print " selected";} ?>>Mail account<option value="address"<?php if ($alias[0]['Type']=="address"){ print " selected";} ?>>Email address</select> <a href="help.php#aliastype">?</a></td></tr>
@@ -122,7 +121,7 @@ if ($ddetails['Mail'] == "primary") {
   <a name=aliasform>
   <form action="domain.php" method="POST">
    <input name="action" type="hidden" value="addalias">
-   <input name="domainid" type="hidden" value="<?php print htmlspecialchars($domainid); ?>">
+   <input name="domainid" type="hidden" value="<?php print htmlspecialchars($ddetails['ID']); ?>">
    <table>
     <tr><td>Address name</td><td><input name="name"> <a href="help.php#aliasname">?</a></td></tr>
     <tr><td>Address type</td><td><select name="type"><option value="account">Mail account<option value="address" selected>Email address</select> <a href="help.php#aliastype">?</a></td></tr>
@@ -141,7 +140,7 @@ if ($ddetails['Mail'] == "primary") {
 print "  <h2>DNS hosts</h2>";
 
 if ($ddetails['DNS'] == "primary") {
-  $hosts = execute("SELECT ID, Name, Type, Data FROM Hosts WHERE DomainID='" . mysql_escape_string($domainid) . "' ORDER BY Name;");
+  $hosts = execute("SELECT ID, Name, Type, Data FROM Hosts WHERE DomainID='" . mysql_escape_string($ddetails['ID']) . "' ORDER BY Name;");
 
   if ($hosts){
 ?>
@@ -149,11 +148,11 @@ if ($ddetails['DNS'] == "primary") {
    <tr><th>Actions</th><th>Address</th><th>Type</th><th>Destination</th></tr>
 <?php
     for($row = 0; $row < count($hosts); $row++){
-      print "   <tr><td><div class=action><a href=\"?action=edithost&amp;domainid=" . urlencode($domainid) . "&amp;hostid=" . urlencode($hosts[$row]['ID']) . "#hostform\">edit</a> <a href=\"?action=deletehost&amp;domainid=" . urlencode($domainid) . "&amp;hostid=" . urlencode($hosts[$row]['ID']) . "\">delete</a></div></td><td>";
+      print "   <tr><td><div class=action><a href=\"?action=edithost&amp;domainid=" . urlencode($ddetails['ID']) . "&amp;hostid=" . urlencode($hosts[$row]['ID']) . "#hostform\">edit</a> <a href=\"?action=deletehost&amp;domainid=" . urlencode($ddetails['ID']) . "&amp;hostid=" . urlencode($hosts[$row]['ID']) . "\">delete</a></div></td><td>";
       if ($hosts[$row]['Name'] == ""){
-        print "<a href=\"http://" . urlencode($domainname) . "\" target=\"_blank\">Default</a>";
+        print "<a href=\"http://" . urlencode($ddetails['DomainName']) . "\" target=\"_blank\">Default</a>";
       }else{
-        print "<a href=\"http://" . urlencode($hosts[$row]['Name']) . "." . urlencode($domainname) . "\" target=\"_blank\">" . htmlspecialchars($hosts[$row]['Name']) . "</a>";
+        print "<a href=\"http://" . urlencode($hosts[$row]['Name']) . "." . urlencode($ddetails['DomainName']) . "\" target=\"_blank\">" . htmlspecialchars($hosts[$row]['Name']) . "</a>";
       }
       print "</td><td>";
       if ($hosts[$row]['Type'] == "website"){
@@ -179,14 +178,14 @@ if ($ddetails['DNS'] == "primary") {
     print "  <p>There are no hosts</p>\n";
   }
 
-  if ($action == "edithost"){
-    $host = execute("SELECT Name, Type, Data FROM Hosts WHERE ID='" . mysql_escape_string($hostid) . "';");
+  if ($_REQUEST['action'] == "edithost"){
+    $host = execute("SELECT Name, Type, Data FROM Hosts WHERE ID='" . mysql_escape_string($_REQUEST['hostid']) . "';");
 ?>
   <a name=hostform>
   <form action="domain.php" method="POST">
    <input name="action" type="hidden" value="updatehost">
-   <input name="domainid" type="hidden" value="<?php print htmlspecialchars($domainid); ?>">
-   <input name="hostid" type="hidden" value="<?php print htmlspecialchars($hostid); ?>">
+   <input name="domainid" type="hidden" value="<?php print htmlspecialchars($ddetails['ID']); ?>">
+   <input name="hostid" type="hidden" value="<?php print htmlspecialchars($_REQUEST['hostid']); ?>">
    <table>
     <tr><td>Host name</td><td><input name="name" value="<?php print htmlspecialchars($host[0]['Name']); ?>"> <a href="help.php#hostname">?</a></td></tr>
     <tr><td>Host type</td><td><select name="type"><option value="website"<?php if($host[0]['Type']=="website"){ print " selected";} ?>>Hosted site<option value="a"<?php if($host[0]['Type']=="a"){ print " selected";} ?>>IP Address<option value="cname"<?php if($host[0]['Type']=="cname"){ print " selected";}?>>Pointer<option value="subdomain"<?php if($host[0]['Type']=="subdomain"){ print " selected";}?>>Subdomain</select> <a href="help.php#hosttype">?</a></td></tr>
@@ -200,7 +199,7 @@ if ($ddetails['DNS'] == "primary") {
   <a name=hostform>
   <form action="domain.php" method="POST">
    <input name="action" type="hidden" value="addhost">
-   <input name="domainid" type="hidden" value="<?php print htmlspecialchars($domainid); ?>">
+   <input name="domainid" type="hidden" value="<?php print htmlspecialchars($ddetails['ID'] ); ?>">
    <table>
     <tr><td>Host name</td><td><input name="name"> <a href="help.php#hostname">?</a></td></tr>
     <tr><td>Host type</td><td><select name="type"><option value="website">Hosted site<option value="a">IP Address<option value="cname" selected>Pointer<option value="subdomain">Subdomain</select> <a href="help.php#hosttype">?</a></td></tr>

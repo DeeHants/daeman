@@ -45,8 +45,6 @@ for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
         mkdir("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", 0750);
         chown("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", $website['UserName']);
         chgrp("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", "apache");
-
-        symlink("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", "/data/websites/live/" . $website['Name']);
       }
 
       if ($website['Logging']) {
@@ -56,8 +54,6 @@ for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
           chmod("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", 0640);
           chown("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", $website['UserName']);
           chgrp("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", "apache");
-
-          symlink("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", "/data/logs/" . $website['Name'] . "_log");
         }
       }
 
@@ -99,8 +95,6 @@ for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
       mkdir("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/", 0750);
       chown("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/", $website['UserName']);
       chgrp("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/", "apache");
-
-      symlink("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_trial/", "/data/websites/" . $website['Name']);
     }
 
   }
@@ -116,7 +110,7 @@ if ($changed == 0) {
 } else {
   system("chmod --reference " . $HTTPConfig . " " . $HTTPConfig . ".new");
   rename($HTTPConfig . ".new", $HTTPConfig);
-  system($PathHTTPInit . " restart >/dev/null");
+  system($HTTPApacheInit . " restart >/dev/null");
   print "Restarting apache\n";
 }
 ?>

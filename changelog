@@ -100,3 +100,19 @@ X  0.08
  * Wrote the updateuser script to add new users and create the website directory
  * Added the Shell field to the server select query in updateall
 X  0.09
+
+16/06/2003
+ * Removed the domain from the relative email links in the domain admin pages
+
+20/06/2003
+ * Renamed the RNDC and INIT path config variables
+ * Removed the symlinks in /data/logs & website, etc...
+ * Added code to update the website log scripts and config files
+
+25/07/2003
+ * Made the index page and common.inc work without register_globals
+ * Moved some variables over to the new superglobal variables
+
+28/07/2003
+ * Made all the code work without register_globals
+X  0.10

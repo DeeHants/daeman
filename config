@@ -11,14 +11,19 @@ $MailAliases = "/etc/aliases";
 $MailVirtUserTable = "/etc/mail/virtusertable";
 $MailRelayDomains = "/etc/mail/relay-domains";
 $MailMailerTable = "/etc/mail/mailertable";
-$PathSendmailInit = "/etc/rc.d/init.d/sendmail";
+$MailSendmailInit = "/etc/rc.d/init.d/sendmail";
 
 $DNSConfig = "/etc/named.conf";
 $DNSZones = "/var/named/";
-$PathNamedRNDC = "/usr/sbin/rndc";
+$DNSNamedRNDC = "/usr/sbin/rndc";
 
 $HTTPConfig = "/etc/httpd/httpd.conf";
-$PathHTTPInit = "/etc/rc.d/init.d/httpd";
+$HTTPApacheInit = "/etc/rc.d/init.d/httpd";
+
+$LogUpdateScript = "/usr/bin/updatelogs";
+$LogConfigPath = "/etc/analog/";
+$LogReportDir = "/var/www/logs/";
+$LogAnalogPath = "/usr/bin/analog";
 
 // These will be added for any corresponding DNS entries.
 $ServersBackupNS = array();

@@ -1,3 +1,5 @@
+php_value register_globals 0
+
 <Files config>
     Order allow,deny
     Deny from all

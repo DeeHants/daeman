@@ -3,9 +3,9 @@ require("ui.inc");
 require("config");
 session_start();
 
-$loggedin = $HTTP_SESSION_VARS['loggedin'];
-$currentuserid = $HTTP_SESSION_VARS['currentuserid'];
-$currentusername = $HTTP_SESSION_VARS['currentusername'];
+$loggedin = $_SESSION['loggedin'];
+$currentuserid = $_SESSION['currentuserid'];
+$action = $_REQUEST['action'];
 
 $DBUser = $DBUsername;
 $DBPass = $DBPassword;
@@ -14,6 +14,34 @@ require("mysql.inc");
 /****************/
 /* User details */
 /****************/
+
+function checkstatus(){
+  global $loggedin, $currentuserid, $details;
+
+  // Redirect back to the index page if they aren't logged in
+  if (!$loggedin){ header("location: /errors/notloggedin.php?url=" . rawurlencode($_SERVER['REQUEST_URI'])); exit(); }
+
+  // If there isn't a specific account ID, use the currently logged in ID
+  if (!isset($_REQUEST['userid'])) { $_REQUEST['userid'] = $currentuserid; }
+
+  // If the manually specified account does not belong to this user, redirect back to the index
+  if (!(($_REQUEST['userid'] == $currentuserid) || userisadmin($currentuserid))) { header("location: errors/invaliddetails.php"); exit(); }
+
+  // If there are no account details for this account, redirect to the index
+  $details = userdetails($_REQUEST['userid']);
+
+  if (!$details) { header("location: /errors/invaliddetails.php"); exit(); }
+}
+
+function checkadminstatus(){
+  global $loggedin, $currentuserid;
+
+  // Redirect back to the index page if they aren't logged in
+  if (!$loggedin){ header("location: /errors/notloggedin.php?url=" . rawurlencode($_SERVER['REQUEST_URI'])); exit(); }
+
+  // If the logged in user isn't an admin, redirect back to the index
+  if (!(userisadmin($currentuserid))){ header("location: /errors/invaliddetails.php"); exit(); }
+}
 
 function checkuserpass($username,$password){
   $ret=execute("SELECT ID FROM Users WHERE Name='" . mysql_escape_string($username) . "' AND (Password=encrypt('" . mysql_escape_string($password) . "', Password));");
@@ -29,8 +57,7 @@ function userisadmin($userid){
 
   if ($userid != $lastuserid) {
     $lastuserid = $userid;
-    $sql = "SELECT Admin FROM Users WHERE ID='" . mysql_escape_string($userid) . "';";
-    $users = execute($sql);
+    $users = execute("SELECT Admin FROM Users WHERE ID='" . mysql_escape_string($userid) . "';");
     if (count($users) > 0){
       $lastresult = ($users[0]['Admin'] == 1);
     }else{
@@ -40,56 +67,16 @@ function userisadmin($userid){
   return $lastresult;
 }
 
-function checkstatus(){
-  global $loggedin, $currentuserid, $userid, $username, $details, $REQUEST_URI;
-
-  // Redirect back to the index page if they aren't logged in
-  if (!$loggedin){ header("location: /errors/notloggedin.php?url=" . rawurlencode($REQUEST_URI)); exit(); }
-
-  // If there isn't a specific account ID, use the currently logged in ID
-  if (!isset($userid) && !isset($username)) { $userid = $currentuserid; }
-  // If there are no account details for this account, redirect to the index
-  $details = userdetails($userid, $username);
-  if (!$details) { header("location: /errors/invaliddetails.php"); exit(); }
-  // If the manually specified account does not belong to this user, redirect back to the index
-  if (!(($userid == $currentuserid) || userisadmin($currentuserid))) { header("location: errors/invaliddetails.php"); exit(); }
-
-  return $userid;
-}
-
-function checkadminstatus(){
-  global $loggedin, $currentuserid, $REQUEST_URI;
-
-  // Redirect back to the index page if they aren't logged in
-  if (!$loggedin){ header("location: /errors/notloggedin.php?url=" . rawurlencode($REQUEST_URI)); exit(); }
-  // If the logged in user isn't an admin, redirect back to the index
-  if (!(userisadmin($currentuserid))){ header("location: /errors/invaliddetails.php"); exit(); }
-}
-
-function userdetails(&$userid, &$username){
-  $sql = "SELECT ID, Name, AccountID, Password, RealName FROM Users WHERE ";
-  if (isset($userid)){
-    $sql .= "ID='" . mysql_escape_string($userid) . "';";
-  }else{
-    if (isset($username)){
-      $sql .= "Name='" . mysql_escape_string($username) . "'";
-    }else{
-      return false;
-    }
-  }
-
-  $users = execute($sql);
+function userdetails($userid) {
+  $users = execute("SELECT ID, Name, AccountID, RealName FROM Users WHERE ID='" . mysql_escape_string($userid) . "';");
   if (count($users) > 0){
-    $userid = $users[0]['ID'];
-    $username = $users[0]['Name'];
     return $users[0];
   }else{
     return false;
   }
 }
 
-function domaindetails(&$domainid, &$domainname, &$domaintitle){
-global $userid;
+function domaindetails($domainid, $domainname){
   $sql = "SELECT ID, UserID, DomainName, Name, DNS, Mail FROM Domains WHERE ";
   if (isset($domainid)){
     $sql .= "ID='" . mysql_escape_string($domainid) . "';";
@@ -103,18 +90,14 @@ global $userid;
 
   $domains = execute($sql);
   if (count($domains) > 0){
-    $domainid = $domains[0]['ID'];
-    $domainname = $domains[0]['DomainName'];
-    $domaintitle = $domains[0]['Name'];
-    $userid = $domains[0]['UserID'];
+    $_REQUEST['userid'] = $domains[0]['UserID'];
     return $domains[0];
   }else{
     return false;
   }
 }
 
-function websitedetails(&$websiteid, &$websitename){
-global $userid;
+function websitedetails($websiteid, $websitename){
   $sql = "SELECT ID, UserID, Name, Trial, Logging FROM Websites WHERE ";
   if (isset($websiteid)){
     $sql .= "ID='" . $websiteid . "';";
@@ -128,9 +111,7 @@ global $userid;
 
   $websites = execute($sql);
   if (count($websites) > 0){
-    $websiteid = $websites[0]['ID'];
-    $websitename = $websites[0]['Name'];
-    $userid = $websites[0]['UserID'];
+    $_REQUEST['userid'] = $websites[0]['UserID'];
     return $websites[0];
   }else{
     return false;

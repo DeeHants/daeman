@@ -1,9 +1,9 @@
-<?
+<?php
 function execute($sql) {
   global $DBName, $DBHost, $DBUser, $DBPass, $DBError;
 
   # Connect to the server
-  $link = mysql_connect ($DBHost, $DBUser, $DBPass);
+  $link = mysql_pconnect ($DBHost, $DBUser, $DBPass);
 
   # Select database
   mysql_select_db ($DBName, $link);
@@ -45,9 +45,17 @@ function execute($sql) {
   # Free up the results
   @mysql_free_result($rst);
 
-  # Disconnect from the database
-  @mysql_close($link);
+#  # Disconnect from the database
+#  @mysql_close($link);
 
   return $results;
+}
+
+function mysql_to_date($datestr) {
+  list($date, $time) = split(' ', trim($datestr));
+  list($year, $month, $day) = split('-', $date);
+  list($hours, $mins, $seconds) = split(':', $time);
+  $unixtime = mktime($hours, $mins, $seconds, $month, $day, $year);
+  return $unixtime;
 }
 ?>

@@ -7,28 +7,28 @@ print_header("User Administration");
 print "  <h3><a href=\"../index.php\">Home</a> - <a href=\"index.php\">System administration</a> - Users</h3>\n";
 
 
-if (isset($action)){
-  if ($action == "adduser"){
-    if ($mode == "service"){
+if (isset($_REQUEST['action'])){
+  if ($_REQUEST['action'] == "adduser"){
+    if ($_REQUEST['mode'] == "service"){
       $res = execute("SELECT Max(AccountID) AS LastID FROM Users WHERE AccountID>=400 AND AccountID<500;");
       $nextaccountid = $res[0]['LastID'];
       $nextaccountid++;
-    }elseif ($mode == "user" || $mode == "admin"){
+    }elseif ($_REQUEST['mode'] == "user" || $_REQUEST['mode'] == "admin"){
       $res = execute("SELECT Max(AccountID) AS LastID FROM Users WHERE AccountID>=500 AND AccountID<1000;");
       $nextaccountid = $res[0]['LastID'];
       $nextaccountid++;
-    }elseif ($mode == "customer"){
+    }elseif ($_REQUEST['mode'] == "customer"){
       $res = execute("SELECT Max(AccountID) AS LastID FROM Users WHERE AccountID>=1000;");
       $nextaccountid = $res[0]['LastID'];
       $nextaccountid = (($nextaccountid / 100) + 1) * 100;
     }
 
-    if (execute("INSERT INTO Users (Name, AccountID, Password, DBPassword, RealName, Enabled, Hosting, Admin, DB) VALUES ('" . mysql_escape_string($name) . "', '" . mysql_escape_string($nextaccountid) . "', '!!', '', '" . mysql_escape_string($realname) . "', '" . mysql_escape_string($enabled) . "', " . iif($mode == "customer", "1", "0") . ", " . iif($mode == "admin", "1", "0") . ", 0);")){
+    if (execute("INSERT INTO Users (Name, AccountID, Password, DBPassword, RealName, Enabled, Hosting, Admin, DB) VALUES ('" . mysql_escape_string($_REQUEST['name']) . "', '" . mysql_escape_string($nextaccountid) . "', '!!', '', '" . mysql_escape_string($_REQUEST['realname']) . "', '" . mysql_escape_string($_REQUEST['enabled']) . "', " . iif($_REQUEST['mode'] == "customer", "1", "0") . ", " . iif($_REQUEST['mode'] == "admin", "1", "0") . ", 0);")){
       print "  <p class=status>User added successfully.</p>\n";
     }else{
       print "  <p class=error>Error adding user. $DBError</p>\n";
     }
-  }elseif ($action == "updateuser"){
+  }elseif ($_REQUEST['action'] == "updateuser"){
 /*
 <!--
 Name	AccountID	Password,DBPassword	RealName	Expires	Enabled	 Hosting	Admin	DB
@@ -36,14 +36,14 @@ form	form					form			form	form	form	form
 -->
 */
 
-//    if (execute("UPDATE Users SET Name='" . mysql_escape_string($name) . "', AccountID='" . mysql_escape_string($accountid) . "', RealName='" . mysql_escape_string($realname) . "', Enabled='" . mysql_escape_string($enabled) . "', Hosting='" . mysql_escape_string($hosting) . "' WHERE ID='" . mysql_escape_string($userid) . "';")){
-    if (execute("UPDATE Users SET Name='" . mysql_escape_string($name) . "', AccountID='" . mysql_escape_string($accountid) . "', RealName='" . mysql_escape_string($realname) . "', Enabled='" . mysql_escape_string($enabled) . "', Hosting='" . mysql_escape_string($hosting) . "', Admin='" . mysql_escape_string($admin) . "', DB='" . mysql_escape_string($db) . "' WHERE ID='" . mysql_escape_string($userid) . "';")){
+//    if (execute("UPDATE Users SET Name='" . mysql_escape_string($_REQUEST['name']) . "', AccountID='" . mysql_escape_string($_REQUEST['accountid']) . "', RealName='" . mysql_escape_string($_REQUEST['realname']) . "', Enabled='" . mysql_escape_string($_REQUEST['enabled']) . "', Hosting='" . mysql_escape_string($_REQUEST['hosting']) . "' WHERE ID='" . mysql_escape_string($_REQUEST['userid']) . "';")){
+    if (execute("UPDATE Users SET Name='" . mysql_escape_string($_REQUEST['name']) . "', AccountID='" . mysql_escape_string($_REQUEST['accountid']) . "', RealName='" . mysql_escape_string($_REQUEST['realname']) . "', Enabled='" . mysql_escape_string($_REQUEST['enabled']) . "', Hosting='" . mysql_escape_string($_REQUEST['hosting']) . "', Admin='" . mysql_escape_string($_REQUEST['admin']) . "', DB='" . mysql_escape_string($_REQUEST['db']) . "' WHERE ID='" . mysql_escape_string($_REQUEST['userid']) . "';")){
       print "  <p class=status>User updated successfully.</p>\n";
     }else{
       print "  <p class=error>Error updating user.</p>\n";
     }
-  }elseif ($action == "deleteuser"){
-    if (execute("DELETE FROM Users WHERE ID='" . mysql_escape_string($userid) . "';")){
+  }elseif ($_REQUEST['action'] == "deleteuser"){
+    if (execute("DELETE FROM Users WHERE ID='" . mysql_escape_string($_REQUEST['userid']) . "';")){
       print "  <p class=status>User deleted successfully.</p>\n";
     }else{
       print "  <p class=error>Error deleting user.</p>\n";
@@ -67,14 +67,13 @@ if ($users){
   print "  <p>There are no users</p>\n";
 }
 
-if ($action == "edituser"){
-  $user = execute("SELECT Name, AccountID, RealName, Enabled, Hosting, DB, 
-Admin FROM Users WHERE ID='" . mysql_escape_string($userid) . "';");
+if ($_REQUEST['action'] == "edituser"){
+  $user = execute("SELECT Name, AccountID, RealName, Enabled, Hosting, DB, Admin FROM Users WHERE ID='" . mysql_escape_string($_REQUEST['userid']) . "';");
 ?>
   <a name=userform>
   <form action="users.php" method="POST">
    <input name="action" type="hidden" value="updateuser">
-   <input name="userid" type="hidden" value="<?php print htmlspecialchars($userid); ?>">
+   <input name="userid" type="hidden" value="<?php print htmlspecialchars($_REQUEST['userid']); ?>">
    <table>
     <tr><td>User name</td><td><input name="name" value="<?php print htmlspecialchars($user[0]['Name']); ?>"> <a href="../help.php#username">?</a></td></tr>
     <tr><td>User ID</td><td><input name="accountid" value="<?php print htmlspecialchars($user[0]['AccountID']); ?>"> <a href="../help.php#useraccountid">?</a></td></tr>

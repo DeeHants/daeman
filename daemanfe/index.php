@@ -3,38 +3,35 @@ require("common.inc");
 
 $loginfailed = false;
 
-if (isset($action)){
-  if ($action=="logout"){
-    $loggedin=false;
-    $currentuserid=false;
-    $currentusername="";
-    session_unset("loggedin", "currentuserid", "currentusername");
-  }
+if ($_REQUEST['action'] == "logout"){
+  $loggedin = false;
+  $currentuserid = 0;
+  session_unset();
 }
 
-if (isset($loginusername) && isset($loginpassword)){
-  $loginuserid = checkuserpass($loginusername, $loginpassword);
+if (isset($_REQUEST['loginusername']) && isset($_REQUEST['loginpassword'])) {
+  $loginuserid = checkuserpass($_REQUEST['loginusername'], $_REQUEST['loginpassword']);
   if ($loginuserid){
-    $loggedin=true;
-    $currentuserid=$loginuserid;
-    $currentusername=$loginusername;
-    session_register("loggedin", "currentuserid", "currentusername");
-    setcookie("lastusername", $loginusername);
-    if (isset($url)) {
-      header("Location: " . $url);
+    session_unset();
+    $loggedin = true;
+    $currentuserid = $loginuserid;
+    session_register("loggedin", "currentuserid");
+    setcookie("lastusername", $_REQUEST['loginusername']);
+    if (isset($_REQUEST['url'])) {
+      header("Location: " . $_REQUEST['url']);
       exit;
     }
   }else{
-    $loggedin=false;
-    $currentuserid=false;
-    $currentusername="";
+    $loggedin = false;
+    $currentuserid = 0;
     session_unset();
     $loginfailed = true;
   }
 }
 
 if ($loggedin){
-  print_header("Logged in: " . $currentusername);
+  $details = userdetails($currentuserid);
+  print_header("Logged in: " . $details['RealName']);
 ?>
   <h3>Home</h3>
   <p><a href="user.php?userid=<?php print urlencode($currentuserid); ?>">Administer account</a></p>
@@ -57,12 +54,12 @@ if ($loggedin){
 <?php
   }
 ?>
-  <form method="POST" action="<?php print $PHP_SELF; ?>">
+  <form action="index.php" method="POST">
 <?php
-if (isset($url)) { print "   <input type=hidden name=\"url\" value=\"" . htmlspecialchars($url) . "\">\n"; }
+if (isset($_REQUEST['url'])) { print "   <input type=hidden name=\"url\" value=\"" . htmlspecialchars($_REQUEST['url']) . "\">\n"; }
 ?>
    <table>
-    <tr><td>User name</td><td><input name="loginusername" value="<?php print htmlspecialchars($HTTP_COOKIE_VARS['lastusername']); ?>"></td></tr>
+    <tr><td>User name</td><td><input name="loginusername" value="<?php print htmlspecialchars($_COOKIE['lastusername']); ?>"></td></tr>
     <tr><td>Password</td><td><input name="loginpassword" type="password"></td></tr>
     <tr><td colspan=2 align=center><input type=submit value="Login"></td></tr>
    </table>

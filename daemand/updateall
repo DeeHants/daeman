@@ -28,6 +28,7 @@ if (mysql_num_rows($servers) == 0) {
     if ($server['DNS']) { include("updatedns"); }
     if ($server['Mail']) { include("updatemail"); }
     if ($server['HTTP']) { include("updateweb"); }
+    if ($server['HTTP']) { include("updatelogs"); }
     if ($server['DB']) { include("updatedb"); }
     if ($server['List']) { include("updatelist"); }
   }

@@ -82,6 +82,6 @@ if ($changed == 0) {
   system("makemap -f hash " . $MailVirtUserTable . ".db < " . $MailVirtUserTable);
   system("makemap -f hash " . $MailMailerTable . ".db < " . $MailMailerTable);
   print "Restarting sendmail\n";
-  system($PathSendmailInit . " restart >/dev/null");
+  system($MailSendmailInit . " restart >/dev/null");
 }
 ?>

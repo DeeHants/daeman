@@ -5,21 +5,21 @@ checkadminstatus();
 print_header("Servers");
 print "  <h3><a href=\"../index.php\">Home</a> - <a href=\"index.php\">System administration</a> - Servers</h3>\n";
 
-if (isset($action)){
-  if ($action == "addserver"){
-    if (execute("INSERT INTO Servers (Name, FullName, Address, Live, DNS, Mail, HTTP, DB, List, Shell) VALUES ('" . mysql_escape_string($name) . "', '" . mysql_escape_string($fullname) . "', '" . mysql_escape_string($address) . "', '" . mysql_escape_string($live) . "', '" . mysql_escape_string($dns) . "', '" . mysql_escape_string($mail) . "', '" . mysql_escape_string($http) . "', '" . mysql_escape_string($db) . "', '" . mysql_escape_string($list) . "', '" . mysql_escape_string($shell) . "');")){
+if (isset($_REQUEST['action'])){
+  if ($_REQUEST['action'] == "addserver"){
+    if (execute("INSERT INTO Servers (Name, FullName, Address, Live, DNS, Mail, HTTP, DB, List, Shell) VALUES ('" . mysql_escape_string($_REQUEST['name']) . "', '" . mysql_escape_string($_REQUEST['fullname']) . "', '" . mysql_escape_string($_REQUEST['address']) . "', '" . mysql_escape_string($_REQUEST['live']) . "', '" . mysql_escape_string($_REQUEST['dns']) . "', '" . mysql_escape_string($_REQUEST['mail']) . "', '" . mysql_escape_string($_REQUEST['http']) . "', '" . mysql_escape_string($_REQUEST['db']) . "', '" . mysql_escape_string($_REQUEST['list']) . "', '" . mysql_escape_string($_REQUEST['shell']) . "');")){
       print "  <p class=status>Server added successfully.</p>\n";
     }else{
       print "  <p class=error>Error adding server.</p>\n";
     }
-  }elseif ($action == "updateserver"){ 
-    if (execute("UPDATE Servers SET Name='" . mysql_escape_string($name) . "', FullName='" . mysql_escape_string($fullname) . "', Address='" . mysql_escape_string($address) . "', Live='" . mysql_escape_string($live) ."', DNS='" . mysql_escape_string($dns) . "', Mail='" . mysql_escape_string($mail) . "', HTTP='" . mysql_escape_string($http) . "', DB='" . mysql_escape_string($db) . "', List='" . mysql_escape_string($list) ."', Shell='" . mysql_escape_string($shell) ."' WHERE ID='" . mysql_escape_string($serverid) . "';")){
+  }elseif ($_REQUEST['action'] == "updateserver"){ 
+    if (execute("UPDATE Servers SET Name='" . mysql_escape_string($_REQUEST['name']) . "', FullName='" . mysql_escape_string($_REQUEST['fullname']) . "', Address='" . mysql_escape_string($_REQUEST['address']) . "', Live='" . mysql_escape_string($_REQUEST['live']) ."', DNS='" . mysql_escape_string($_REQUEST['dns']) . "', Mail='" . mysql_escape_string($_REQUEST['mail']) . "', HTTP='" . mysql_escape_string($_REQUEST['http']) . "', DB='" . mysql_escape_string($_REQUEST['db']) . "', List='" . mysql_escape_string($_REQUEST['list']) ."', Shell='" . mysql_escape_string($_REQUEST['shell']) ."' WHERE ID='" . mysql_escape_string($_REQUEST['serverid']) . "';")){
       print "  <p class=status>Server updated successfully.</p>\n";
     }else{
       print "  <p class=error>Error updating server.</p>\n";
     }
-  }elseif ($action == "deleteserver"){
-    if (execute("DELETE FROM Servers WHERE ID='" . mysql_escape_string($serverid) . "';")){
+  }elseif ($_REQUEST['action'] == "deleteserver"){
+    if (execute("DELETE FROM Servers WHERE ID='" . mysql_escape_string($_REQUEST['serverid']) . "';")){
       print "  <p class=status>Server deleted successfully.</p>\n";
     }else{
       print "  <p class=error>Error deleting server.</p>\n";
@@ -43,13 +43,13 @@ if ($servers){
   print "  <p>There are no servers</p>\n";
 }
 
-if ($action == "editserver"){
-  $server = execute("SELECT Name, FullName, Address, Live, DNS, Mail, HTTP, DB, List, Shell FROM Servers WHERE ID='" . mysql_escape_string($serverid) . "';");
+if ($_REQUEST['action'] == "editserver"){
+  $server = execute("SELECT Name, FullName, Address, Live, DNS, Mail, HTTP, DB, List, Shell FROM Servers WHERE ID='" . mysql_escape_string($_REQUEST['serverid']) . "';");
 ?>
   <a name=serverform>
   <form action="servers.php" method="POST">
    <input name="action" type="hidden" value="updateserver">
-   <input name="serverid" type="hidden" value="<?php print htmlspecialchars($serverid); ?>">
+   <input name="serverid" type="hidden" value="<?php print htmlspecialchars($_REQUEST['serverid']); ?>">
    <table>
     <tr><td>Server name</td><td><input name="name" value="<?php print htmlspecialchars($server[0]['Name']); ?>"> <a href="../help.php#servername">?</a></td></tr>
     <tr><td>Fully qualified name</td><td><input name="fullname" value="<?php print htmlspecialchars($server[0]['FullName']); ?>"> <a href="../help.php#serverfullname">?</a></td></tr>

@@ -78,7 +78,7 @@ for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
         rename($DNSZones . $domain['Name'] . ".zone.new", $DNSZones . $domain['Name'] . ".zone");
 
         print "reloading " . $domain['DomainName'] . "\n";
-        system($PathNamedRNDC . " reload " . $domain['DomainName']);
+        system($DNSNamedRNDC . " reload " . $domain['DomainName']);
 
         mysql_query("UPDATE Domains SET DNSSerial='" . mysql_escape_string($serial) . "' WHERE ID='" . mysql_escape_string($domain['ID']) . "';", $link);
       }        
@@ -118,7 +118,7 @@ if ($changed == 0) {
   rename($DNSConfig . ".new", $DNSConfig);
 
   print "Restarting Named\n";
-  system($PathNamedRNDC . " reload");
+  system($DNSNamedRNDC . " reload");
 }
 
 function nextserial($serial) {

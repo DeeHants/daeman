@@ -5,26 +5,26 @@ checkstatus();
 
 print_header("Hosted websites: " . htmlspecialchars($details['RealName']));
 ?>
-  <h3><a href="index.php">Home</a> - <a href="user.php?userid=<?php print urlencode($userid); ?>">Account</a> - Websites</h3>
+  <h3><a href="index.php">Home</a> - <a href="user.php?userid=<?php print urlencode($details['ID']); ?>">Account</a> - Websites</h3>
   <h2>Websites</h2>
 <?php
-if (isset($action)){
+if (isset($_REQUEST['action'])){
   if (userisadmin($currentuserid)) {
-    if ($action == "addwebsite"){
-      if (execute("INSERT INTO Websites (UserID, Name, Trial, Logging, Redirect, ServerID) VALUES ('" . mysql_escape_string($userid) . "', '" . mysql_escape_string($name) . "','" . mysql_escape_string($trial) . "','" . mysql_escape_string($logging) . "', '" . mysql_escape_string($redirect). "', '" . mysql_escape_string($serverid) . "');")){
+    if ($_REQUEST['action'] == "addwebsite"){
+      if (execute("INSERT INTO Websites (UserID, Name, Trial, Logging, Redirect, ServerID) VALUES ('" . mysql_escape_string($details['ID']) . "', '" . mysql_escape_string($_REQUEST['name']) . "','" . mysql_escape_string($_REQUEST['trial']) . "','" . mysql_escape_string($_REQUEST['logging']) . "', '" . mysql_escape_string($_REQUEST['redirect']). "', '" . mysql_escape_string($_REQUEST['serverid']) . "');")){
         print "  <p class=status>Website added successfully.</p>\n";
       }else{
         print "  <p class=error>Error adding website.</p>\n";
       }
-    }elseif ($action == "updatewebsite"){
-      if (execute("UPDATE Websites SET Name='" . mysql_escape_string($name) . "', Trial='" . mysql_escape_string($trial) . "', Logging='" . mysql_escape_string($logging) . "', Redirect='" .mysql_escape_string($redirect) . "', Parameters='" . mysql_escape_string($parameters) . "', ServerID='" . mysql_escape_string($serverid) . "' WHERE ID='" . mysql_escape_string($websiteid) . "';")){
+    }elseif ($_REQUEST['action'] == "updatewebsite"){
+      if (execute("UPDATE Websites SET Name='" . mysql_escape_string($_REQUEST['name']) . "', Trial='" . mysql_escape_string($_REQUEST['trial']) . "', Logging='" . mysql_escape_string($_REQUEST['logging']) . "', Redirect='" .mysql_escape_string($_REQUEST['redirect']) . "', Parameters='" . mysql_escape_string($_REQUEST['parameters']) . "', ServerID='" . mysql_escape_string($_REQUEST['serverid']) . "' WHERE ID='" . mysql_escape_string($_REQUEST['websiteid']) . "';")){
         print "  <p class=status>Website updated successfully.</p>\n";
       }else{
         print "  <p class=error>Error updating website.</p>\n";
       }
-    }elseif ($action == "deletewebsite"){
-      if (execute("DELETE FROM Websites WHERE ID='" . mysql_escape_string($websiteid) . "';")){
-        if (execute("DELETE FROM WebsiteHosts WHERE WebsiteID='" . mysql_escape_string($websiteid) . "';")){
+    }elseif ($_REQUEST['action'] == "deletewebsite"){
+      if (execute("DELETE FROM Websites WHERE ID='" . mysql_escape_string($_REQUEST['websiteid']) . "';")){
+        if (execute("DELETE FROM WebsiteHosts WHERE WebsiteID='" . mysql_escape_string($_REQUEST['websiteid']) . "';")){
           print "  <p class=status>Website deleted successfully.</p>\n";
         }else{
           print "  <p class=error>Error deleting website hosts.</p>\n";
@@ -36,7 +36,7 @@ if (isset($action)){
   }
 }
 
-$websites = execute("SELECT ID, Name, Trial, Logging FROM Websites WHERE UserID='" . mysql_escape_string($userid) . "';");
+$websites = execute("SELECT ID, Name, Trial, Logging FROM Websites WHERE UserID='" . mysql_escape_string($details['ID']) . "';");
 
 if ($websites){
 ?>
@@ -45,7 +45,7 @@ if ($websites){
 <?php
   for($row = 0; $row < count($websites); $row++){
     if (userisadmin($currentuserid)) {
-      print "   <tr><td><div class=action><a href=\"?action=editwebsite&amp;userid=" . urlencode($userid) . "&amp;websiteid=" . urlencode($websites[$row]['ID']) . "#websiteform\">edit</a> <a href=\"?action=deletewebsite&amp;userid=" . urlencode($userid) . "&amp;websiteid=" . urlencode($websites[$row]['ID']) . "\">delete</a></div></td><td><a href=\"website.php?websiteid=" . urlencode($websites[$row]['ID']) . "\">" . htmlspecialchars($websites[$row]['Name']) . "</a></td><td>" . iif($websites[$row]['Trial'], "Yes", "No") . "</td><td>" . iif($websites[$row]['Logging'], "Yes", "No") . "</td></tr>\n";
+      print "   <tr><td><div class=action><a href=\"?action=editwebsite&amp;userid=" . urlencode($details['ID']) . "&amp;websiteid=" . urlencode($websites[$row]['ID']) . "#websiteform\">edit</a> <a href=\"?action=deletewebsite&amp;userid=" . urlencode($details['ID']) . "&amp;websiteid=" . urlencode($websites[$row]['ID']) . "\">delete</a></div></td><td><a href=\"website.php?websiteid=" . urlencode($websites[$row]['ID']) . "\">" . htmlspecialchars($websites[$row]['Name']) . "</a></td><td>" . iif($websites[$row]['Trial'], "Yes", "No") . "</td><td>" . iif($websites[$row]['Logging'], "Yes", "No") . "</td></tr>\n";
     } else {
       print "   <tr><td><a href=\"website.php?websiteid=" . urlencode($websites[$row]['ID']) . "\">" . htmlspecialchars($websites[$row]['Name']) . "</a></td><td>" . iif($websites[$row]['Trial'], "Yes", "No") . "</td><td>" . iif($websites[$row]['Logging'], "Yes", "No") . "</td></tr>\n";
     }
@@ -58,14 +58,14 @@ if ($websites){
 }
 
 if (userisadmin($currentuserid)) {
-  if ($action == "editwebsite"){
-    $website = execute("SELECT Name, Trial, Logging, Redirect, Parameters, ServerID FROM Websites WHERE ID='" . mysql_escape_string($websiteid) . "';");
+  if ($_REQUEST['action'] == "editwebsite"){
+    $website = execute("SELECT Name, Trial, Logging, Redirect, Parameters, ServerID FROM Websites WHERE ID='" . mysql_escape_string($_REQUEST['websiteid']) . "';");
 ?>
   <a name=websiteform>
   <form action="websites.php" method="POST">
    <input name="action" type="hidden" value="updatewebsite">
-   <input name="userid" type="hidden" value="<?php print htmlspecialchars($userid); ?>">
-   <input name="websiteid" type="hidden" value="<?php print htmlspecialchars($websiteid); ?>">
+   <input name="userid" type="hidden" value="<?php print htmlspecialchars($details['ID']); ?>">
+   <input name="websiteid" type="hidden" value="<?php print htmlspecialchars($_REQUEST['websiteid']); ?>">
    <table>
     <tr><td>Website name</td><td><input name="name" value="<?php print htmlspecialchars($website[0]['Name']); ?>"> <a href="help.php#websitename">?</a></td></tr>
     <tr><td>Trial site?</td><td><input type="checkbox" name="trial" value=1<?php if ($website[0]['Trial']) { print " checked"; } ?>> <a href="../help.php#websitetrial">?</a></td></tr>
@@ -82,7 +82,7 @@ if (userisadmin($currentuserid)) {
   <a name=websiteform>
   <form action="websites.php" method="POST">
    <input name="action" type="hidden" value="addwebsite">
-   <input name="userid" type="hidden" value="<?php print htmlspecialchars($userid); ?>">
+   <input name="userid" type="hidden" value="<?php print htmlspecialchars($details['ID']); ?>">
    <table>
     <tr><td>Name</td><td><input name="name"> <a href="help.php#websitename">?</a></td></tr>
     <tr><td>Trial site?</td><td><input type="checkbox" name="trial" value=1 checked> <a href="../help.php#websitetrial">?</a></td></tr>
