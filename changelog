@@ -74,6 +74,9 @@ X  0.07
 08/05/2003
  * Made it check the localhostnames file had changed as well
 
+11/05/2003
+ * Updated the summary page to not have so many embedded ul tags
+
 12/05/2003
  * Added Servers.List as a flag for whether the server runs a mailing list manager
  * Added code to update the DB and list server if the flag is set
@@ -82,4 +85,18 @@ X  0.07
  * Added a form for mailing List
  * Added a link to the mailing list page from the user page
  * Updated the schema
+X  0.08
 
+15/05/2003
+ * Added links to all the summary items to the respective pages/items
+
+16/05/2003
+ * Moved the check admin code to a common function
+ * Made the checkstatus functions use an absolute path
+ * Made the login form accept a url parameter to redirect to
+ * Made the notlogged in page add the url to the login page
+
+03/06/2003
+ * Wrote the updateuser script to add new users and create the website directory
+ * Added the Shell field to the server select query in updateall
+X  0.09

@@ -1,11 +1,6 @@
 <?php
 require("../common.inc");
-
-// Redirect back to te index page if they aren't logged in
-if (!$loggedin){header("location: ../index.php"); exit();}
-
-// If the logged in user isn't an admin, redirect back to the index
-if (!(userisadmin($currentuserid))){header("location: ../index.php"); exit();}
+checkadminstatus();
 
 print_header("Servers");
 print "  <h3><a href=\"../index.php\">Home</a> - <a href=\"index.php\">System administration</a> - Servers</h3>\n";

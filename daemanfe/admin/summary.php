@@ -1,11 +1,7 @@
 <?php
 require("../common.inc");
 
-// Redirect back to te index page if they aren't logged in
-if (!$loggedin){header("location: ../index.php"); exit();}
-
-// If the logged in user isn't an admin, redirect back to the index
-if (!(userisadmin($currentuserid))){header("location: ../index.php"); exit();}
+checkadminstatus();
 
 print_header("Summary");
 print "  <h3><a href=\"../index.php\">Home</a> - <a href=\"index.php\">System administration</a> - Summary</h3>\n";
@@ -13,15 +9,14 @@ print "  <h3><a href=\"../index.php\">Home</a> - <a href=\"index.php\">System ad
 $users = execute("SELECT ID, Name, RealName FROM Users ORDER BY Name;");
 print "  <ul>\n";
 for ($userid = 0; $userid < count($users); $userid++){
-  print "   <li>" . htmlspecialchars($users[$userid]['Name']) . " (" . htmlspecialchars($users[$userid]['RealName']) . ")\n";
-
+  print "   <li><a href=\"../user.php?userid=" . urlencode($users[$userid]['ID']) . "\">" . htmlspecialchars($users[$userid]['Name']) . "</a>" . iif($users[$userid]['RealName'] != "", " (" . htmlspecialchars($users[$userid]['RealName']) . ")", "") . "\n";
   print "   <ul>\n";
 
   $domains = execute("SELECT ID, Name, DomainName FROM Domains WHERE UserID='" . mysql_escape_string($users[$userid]['ID']) . "' ORDER BY Name;");
   if ($domains){
-    print "    <li><b>Domains:</b>\n";
+     print "    <li><b><a href=\"../domains.php?userid=" . urlencode($users[$userid]['ID']) . "\">Domains</a>:</b>\n";
     for ($domainid = 0; $domainid < count($domains); $domainid++){
-      print "    <li>" . htmlspecialchars($domains[$domainid]['Name']) . " (" . htmlspecialchars($domains[$domainid]['DomainName']) . ")\n";
+      print "    <li><a href=\"../domain.php?domainid=".urlencode($domains[$domainid]['ID']) . "\">" . htmlspecialchars($domains[$domainid]['Name']) . "</a> (" . htmlspecialchars($domains[$domainid]['DomainName']) . ")\n";
       print "    <ul>\n";
 
       $hosts = execute("SELECT ID, Name, Type, Data FROM Hosts WHERE DomainID='" . mysql_escape_string($domains[$domainid]['ID']) . "' ORDER BY Name;");
@@ -46,9 +41,9 @@ for ($userid = 0; $userid < count($users); $userid++){
 
   $websites = execute("SELECT ID, Name FROM Websites WHERE UserID='" . mysql_escape_string($users[$userid]['ID']) . "' ORDER BY Name;");
   if ($websites){
-    print "    <li><b>Websites:</b>\n";
+    print "    <li><b><a href=\"../websites.php?userid=" .urlencode($users[$userid]['ID']) . "\">Websites</a>:</b>\n";
     for ($websiteid = 0; $websiteid < count($websites); $websiteid++){
-      print "    <li>" . htmlspecialchars($websites[$websiteid]['Name']) . "\n";
+      print "    <li><a href=\"../website.php?websiteid=" . urlencode($websites[$websiteid]['ID']) . "\">" . htmlspecialchars($websites[$websiteid]['Name']) . "</a>\n";
       print "    <ul>\n";
 
       $hosts = execute("SELECT ID, Host FROM WebsiteHosts WHERE WebsiteID='" . mysql_escape_string($websites[$websiteid]['ID']) . "' ORDER BY Host;");
@@ -64,7 +59,7 @@ for ($userid = 0; $userid < count($users); $userid++){
 
   $accounts = execute("SELECT ID, Name, RealName FROM Accounts WHERE UserID='" . mysql_escape_string($users[$userid]['ID']) . "' ORDER BY Name;");
   if ($accounts){
-    print "    <li><b>Accounts:</b>\n";
+    print "    <li><b><a href=\"../accounts.php?userid=" .urlencode($users[$userid]['ID']) . "\">Accounts</a>:</b>\n";
     for ($accountid = 0; $accountid < count($accounts); $accountid++){
       print "    <li>" . htmlspecialchars($accounts[$accountid]['Name']) . " (" . htmlspecialchars($accounts[$accountid]['RealName']) . ")\n";
     }

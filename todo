@@ -9,7 +9,7 @@ DaeManFE
 DaeManD
  * Use fully qualified names from the database instead of hard coded
  * Add LOADS of comments
- * Write scripts to update user accounts
+ * Add code to edit existing user accounts
  * Write scripts to update MySQLs users
  * Write scripts to update Mailman lists
  * Optimise SQL queries

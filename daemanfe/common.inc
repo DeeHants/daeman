@@ -41,20 +41,29 @@ function userisadmin($userid){
 }
 
 function checkstatus(){
-  global $loggedin, $currentuserid, $userid, $username, $details;
+  global $loggedin, $currentuserid, $userid, $username, $details, $REQUEST_URI;
 
   // Redirect back to the index page if they aren't logged in
-  if (!$loggedin){header("location: errors/notloggedin.php"); exit();}
+  if (!$loggedin){ header("location: /errors/notloggedin.php?url=" . rawurlencode($REQUEST_URI)); exit(); }
 
   // If there isn't a specific account ID, use the currently logged in ID
-  if (!isset($userid) && !isset($username)){ $userid = $currentuserid;}
+  if (!isset($userid) && !isset($username)) { $userid = $currentuserid; }
   // If there are no account details for this account, redirect to the index
   $details = userdetails($userid, $username);
-  if (!$details){header("location: errors/invaliddetails.php"); exit();}
+  if (!$details) { header("location: /errors/invaliddetails.php"); exit(); }
   // If the manually specified account does not belong to this user, redirect back to the index
-  if (!(($userid == $currentuserid) || userisadmin($currentuserid))){header("location: errors/invaliddetails.php"); exit();}
+  if (!(($userid == $currentuserid) || userisadmin($currentuserid))) { header("location: errors/invaliddetails.php"); exit(); }
 
   return $userid;
+}
+
+function checkadminstatus(){
+  global $loggedin, $currentuserid, $REQUEST_URI;
+
+  // Redirect back to the index page if they aren't logged in
+  if (!$loggedin){ header("location: /errors/notloggedin.php?url=" . rawurlencode($REQUEST_URI)); exit(); }
+  // If the logged in user isn't an admin, redirect back to the index
+  if (!(userisadmin($currentuserid))){ header("location: /errors/invaliddetails.php"); exit(); }
 }
 
 function userdetails(&$userid, &$username){

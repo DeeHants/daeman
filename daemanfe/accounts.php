@@ -11,14 +11,18 @@ print_header("POP3/IMAP accounts: " . htmlspecialchars($details['Name']));
 if (isset($action)){
   if ($action == "addaccount"){
     $res = execute("SELECT Max(AccountID) AS LastID FROM Accounts WHERE UserID='" . mysql_escape_string($userid) . "';");
-    $nextaccountid = $res['LastID'];
-    if (!$nextaccountid){ $res = execute("SELECT AccountID FROM Accounts WHERE ID='" . mysql_escape_string($nextaccountid) . "';"); $nextaccountid = $res['AccountID']; }
+    $nextaccountid = $res[0]['LastID'];
+    if (!($nextaccountid)) {
+      $res = execute("SELECT AccountID FROM Users WHERE ID='" . mysql_escape_string($userid) . "';");
+      $nextaccountid = $res[0]['AccountID'];
+    }
     $nextaccountid++;
 
-    if (execute("INSERT INTO Accounts (UserID, Name, RealName, AccountID) VALUES ('" . mysql_escape_string($userid) . "', '" . mysql_escape_string($name) . "', '" . mysql_escape_string($realname) . "', '" . mysql_escape_string($nextaccountid) . "';")){
+    if (execute("INSERT INTO Accounts (UserID, Name, RealName, AccountID) VALUES ('" . mysql_escape_string($userid) . "', '" . mysql_escape_string($name) . "', '" . mysql_escape_string($realname) . "', '" . mysql_escape_string($nextaccountid) . "');")){
       print "   <p class=status>" . htmlspecialchars($accountname) . " successfully added.</p>";
     }else{
       print "   <p class=error>There was an error adding " . htmlspecialchars($accountname) . ".</p>";
+print $DBError;
     }
   }elseif ($action == "updateaccount"){
     if (execute("UPDATE Accounts SET RealName='" . mysql_escape_string($realname) . "' WHERE ID='" . mysql_escape_string($accountid) . "';")){

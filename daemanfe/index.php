@@ -20,6 +20,10 @@ if (isset($loginusername) && isset($loginpassword)){
     $currentusername=$loginusername;
     session_register("loggedin", "currentuserid", "currentusername");
     setcookie("lastusername", $loginusername);
+    if (isset($url)) {
+      header("Location: " . $url);
+      exit;
+    }
   }else{
     $loggedin=false;
     $currentuserid=false;
@@ -54,6 +58,9 @@ if ($loggedin){
   }
 ?>
   <form method="POST" action="<?php print $PHP_SELF; ?>">
+<?php
+if (isset($url)) { print "   <input type=hidden name=\"url\" value=\"" . htmlspecialchars($url) . "\">\n"; }
+?>
    <table>
     <tr><td>User name</td><td><input name="loginusername" value="<?php print htmlspecialchars($HTTP_COOKIE_VARS['lastusername']); ?>"></td></tr>
     <tr><td>Password</td><td><input name="loginpassword" type="password"></td></tr>

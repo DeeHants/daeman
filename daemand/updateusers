@@ -1,3 +1,25 @@
 <?php
+$users = mysql_query("SELECT Name, AccountID, Password, RealName, Enabled, Admin, Hosting FROM Users WHERE Enabled ORDER BY AccountID;", $link);
+for ($userid = 0; $userid < mysql_num_rows($users); $userid++) {
+  $user = mysql_fetch_array($users);
 
+  if ($server['Shell'] || $user['Admin']) { $shell = ""; } else { $shell = " -s '/sbin/nologin'"; }
+
+  exec("grep /etc/passwd -ie '" . $user['Name'] . "'", $output, $ecode);
+  if ($ecode == 1) {
+    print "Creating user " . $user['Name'] . "\n";
+    system("useradd -u " . $user['AccountID'] . $shell . " -c '" . $user['RealName'] . "' -p '" . $user['Password'] . "' " . $user['Name']);
+    chmod("/home/" . $user['Name'] . "/", 0711);
+  } else {
+    //user exists, update!!!
+  }
+
+  if ($user['Hosting'] && $server['HTTP']) {
+    if (!file_exists("/home/" . $user['Name'] . "/websites/")) {
+      print "Creating website directory for " . $user['Name'] . "\n";
+      mkdir("/home/" . $user['Name'] . "/websites/", 0775);
+    }
+  }
+}
+mysql_free_result($users);
 ?>
