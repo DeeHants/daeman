@@ -144,3 +144,10 @@ CREATE TABLE Websites (
   KEY ServerID (ServerID)
 ) TYPE=MyISAM;
 
+
+
+#
+# Default admin user
+#
+
+INSERT INTO Users VALUES (1, 'admin', 300, '$1$94$ojVgVQb5zk3wVJ5bY8emK/', '445762203765b05e', 'DaeMan Administrator', '0000-00-00', 1, 0, 1, 0, '');

@@ -1,5 +1,10 @@
-16/03/2003
- * Added a "lastusername" cookie to save the name on the fe login form
-
-28/03/2003
+X  0.02
+ * Added a readme file to the archive
+ * Added a default user 
+ * Added a .htaccess to block the config file in the web front end
+X  0.01
  * Initial release on sourceforge.net
+28/03/2003
+
+ * Added a "lastusername" cookie to save the name on the fe login form
+16/03/2003

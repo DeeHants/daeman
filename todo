@@ -1,7 +1,10 @@
 DaeManFE
  * Disable forms for users that dont have hosted accounts
  * Add server options for domains, mail, and websites
- * Rename the config file/add a .htaccess to clock access
+ * Add LOADS of comments
 
 DaeManD
  * Make them honour the ServerID field
+ * Add LOADS of comments
+ * Write scripts to update user accounts
+ * Write scripts to update MySQLs users
