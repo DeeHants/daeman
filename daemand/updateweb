@@ -1,7 +1,7 @@
 <?php
 $configfile = openconfig($HTTPConfig);
 
-$websites = mysql_query("SELECT Websites.ID, Websites.Name, Trial, Logging, Redirect, Users.Name AS UserName FROM Websites LEFT JOIN Users ON Users.ID = Websites.UserID WHERE Enabled=1 AND Hosting=1 AND ServerID='" . mysql_escape_string($localserverid) . "' ORDER BY Name;", $link);
+$websites = mysql_query("SELECT Websites.ID, Websites.Name, Trial, Logging, Redirect, Parameters, Users.Name AS UserName FROM Websites LEFT JOIN Users ON Users.ID = Websites.UserID WHERE Enabled=1 AND Hosting=1 AND ServerID='" . mysql_escape_string($localserverid) . "' ORDER BY Name;", $link);
 for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
   $website = mysql_fetch_array($websites);
 
@@ -39,7 +39,6 @@ for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
       } else {
         fputs($configfile, "\tCustomLog /dev/null combined\n");
       }
-      fputs($configfile, "</VirtualHost>\n");
 
       if (!file_exists("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/")) {
         print "Creating website directory " . $website['Name'] . " for " . $website['UserName'] . "\n";
@@ -69,9 +68,21 @@ for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
       fputs($configfile, "\tCustomLog /dev/null combined\n");
       fputs($configfile, "\tRewriteEngine On\n");
       fputs($configfile, "\tRewriteRule ^/(.*) " . $website['Redirect'] . "$1 [R]\n");
-      fputs($configfile, "</VirtualHost>\n");
 
     }
+
+    if ($website['Parameters'] != "") {
+      fputs($configfile, "\n");
+      $parameters = str_replace("\r\n", "\n", $website['Parameters']);
+      $parameters = split("\n", $parameters);
+      for($parameterid = 0; $parameterid < count($parameters); $parameterid++){
+        if ($parameters[$parameterid] != "") {
+          fputs($configfile, "\t" . $parameters[$parameterid] . "\n");
+        }
+      }
+    }      
+    fputs($configfile, "</VirtualHost>\n");
+
   }
   mysql_free_result($hosts);
   mysql_free_result($fhosts);

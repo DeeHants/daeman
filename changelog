@@ -1,60 +1,69 @@
-X  0.06
- * Made the openconfig function check for the existence of the .static files before continuing and copy the live config to .static if they dont
- * Created a diff function to tell if 2 files have changed
- * Moved the opening of config files to another function in a common file
-24/04/2003
-
- * Made it update DNS before Mail
-08/04/2003
-
-X  0.05
- * Added the mod_rewrite rules to the update web script when a webiste redirects elsewhere
- * Add code to not do any updates if Servers.Live is not set
- * Add a Live and Shell options to the server settings page
- * Updated the schema
- * Added Servers.Live and Servers.Shell to signify the server is to update its config it allows shell logins
-06/04/2003
-
- * Add a website option to redirect elsewhere
- * Added a Websites.Redirect field to contain a URL to redirect a whole site
-04/04/2003
-
- * Corrected some syntactical errors in the front end
-X  0.04
-02/04/2003
-
- * Moved the "restarting sendmail" line to before it restarts sendmail
- * Changed the diff nesting in updatemail
- * Removed the @ from most of the mysql functions as it is unnecassary
- * Added fully qualified name to the Servers form
- * Updated the schema
- * Added a Servers.FullName field to contain the fully qualified server name
- * Made the updatedns script put the correct IP address for the selected server
-01/04/2003
-
-X  0.03
- * Modified all the update scripts to only add the entries that apply to their local server
- * Modified all the update scripts to use a common MySQL database connection
- * Modified all the update scripts to be called using include() 
-31/03/2003
-
- * Added Server field to Websites and Domains (for Mail and DNS)
- * Updated the schema
- * Renamed some indexes to make it insert without errors
- * Removed Domains.ServerID and added MailServerID and DNSServerID
- * Corrected some typos in the documentation
-30/03/2003
-
- * Added caching to the isuseradmin function
-29/03/2003
-
-X  0.02
- * Added a readme file to the archive
- * Added a default user 
- * Added a .htaccess to block the config file in the web front end
-X  0.01
- * Initial release on sourceforge.net
-28/03/2003
-
- * Added a "lastusername" cookie to save the name on the fe login form
 16/03/2003
+ * Added a "lastusername" cookie to save the name on the fe login form
+
+28/03/2003
+ * Initial release on sourceforge.net
+X  0.01
+ * Added a .htaccess to block the config file in the web front end
+ * Added a default user 
+ * Added a readme file to the archive
+X  0.02
+
+29/03/2003
+ * Added caching to the isuseradmin function
+
+30/03/2003
+ * Corrected some typos in the documentation
+ * Removed Domains.ServerID and added MailServerID and DNSServerID
+ * Renamed some indexes to make it insert without errors
+ * Updated the schema
+ * Added Server field to Websites and Domains (for Mail and DNS)
+
+31/03/2003
+ * Modified all the update scripts to be called using include() 
+ * Modified all the update scripts to use a common MySQL database connection
+ * Modified all the update scripts to only add the entries that apply to their local server
+X  0.03
+
+01/04/2003
+ * Made the updatedns script put the correct IP address for the selected server
+ * Added a Servers.FullName field to contain the fully qualified server name
+ * Updated the schema
+ * Added fully qualified name to the Servers form
+ * Removed the @ from most of the mysql functions as it is unnecassary
+ * Changed the diff nesting in updatemail
+ * Moved the "restarting sendmail" line to before it restarts sendmail
+
+02/04/2003
+X  0.04
+ * Corrected some syntactical errors in the front end
+
+04/04/2003
+ * Added a Websites.Redirect field to contain a URL to redirect a whole site
+ * Add a website option to redirect elsewhere
+
+06/04/2003
+ * Added Servers.Live and Servers.Shell to signify the server is to update its config it allows shell logins
+ * Updated the schema
+ * Add a Live and Shell options to the server settings page
+ * Add code to not do any updates if Servers.Live is not set
+ * Added the mod_rewrite rules to the update web script when a webiste redirects elsewhere
+X  0.05
+
+08/04/2003
+ * Made it update DNS before Mail
+
+24/04/2003
+ * Moved the opening of config files to another function in a common file
+ * Created a diff function to tell if 2 files have changed
+ * Made the openconfig function check for the existence of the .static files before continuing and copy the live config to .static if they dont
+X  0.06
+
+27/04/2003
+ * Reversed the changelog file so it is in a sensible order!
+ * Added a Websites.Parameters filed to hold extra Apache vhost directives
+ * Updated the schema
+ * Added code to add the website parameters to the config file
+ * Made it split up the parameters and add them preceded with a tab
+ * Added the UI to set the extra VHost directives
+X  0.07

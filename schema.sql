@@ -145,6 +145,7 @@ CREATE TABLE Websites (
   Trial tinyint(1) NOT NULL default '1',
   Logging tinyint(1) NOT NULL default '1',
   Redirect varchar(255) NOT NULL default '',
+  Parameters text NOT NULL,
   ServerID int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (ID),
   UNIQUE KEY Name (Name),

@@ -17,7 +17,7 @@ if (isset($action)){
         print "  <p class=error>Error adding website.</p>\n";
       }
     }elseif ($action == "updatewebsite"){
-      if (execute("UPDATE Websites SET Name='" . mysql_escape_string($name) . "', Trial='" . mysql_escape_string($trial) . "', Logging='" . mysql_escape_string($logging) . "', Redirect='" .mysql_escape_string($redirect) . "', ServerID='" . mysql_escape_string($serverid) . "' WHERE ID='" . mysql_escape_string($websiteid) . "';")){
+      if (execute("UPDATE Websites SET Name='" . mysql_escape_string($name) . "', Trial='" . mysql_escape_string($trial) . "', Logging='" . mysql_escape_string($logging) . "', Redirect='" .mysql_escape_string($redirect) . "', Parameters='" . mysql_escape_string($parameters) . "', ServerID='" . mysql_escape_string($serverid) . "' WHERE ID='" . mysql_escape_string($websiteid) . "';")){
         print "  <p class=status>Website updated successfully.</p>\n";
       }else{
         print "  <p class=error>Error updating website.</p>\n";
@@ -59,7 +59,7 @@ if ($websites){
 
 if (userisadmin($currentuserid)) {
   if ($action == "editwebsite"){
-    $website = execute("SELECT Name, Trial, Logging, Redirect, ServerID FROM Websites WHERE ID='" . mysql_escape_string($websiteid) . "';");
+    $website = execute("SELECT Name, Trial, Logging, Redirect, Parameters, ServerID FROM Websites WHERE ID='" . mysql_escape_string($websiteid) . "';");
 ?>
   <a name=websiteform>
   <form action="websites.php" method="POST">
@@ -71,6 +71,7 @@ if (userisadmin($currentuserid)) {
     <tr><td>Trial site?</td><td><input type="checkbox" name="trial" value=1<?php if ($website[0]['Trial']) { print " checked"; } ?>> <a href="../help.php#websitetrial">?</a></td></tr>
     <tr><td>Enable Logging</td><td><input type="checkbox" name="logging" value=1<?php if ($website[0]['Logging']) { print " checked"; } ?>> <a href="../help.php#websitelogging">?</a></td></tr>
     <tr><td>Redirect to</td><td><input name="redirect" value="<?php print htmlspecialchars($website[0]['Redirect']); ?>"> <a href="help.php#websiteredirect">?</a></td></tr>
+    <tr><td>VHost directives</td><td><textarea name="parameters" rows=3 cols=40><?php print htmlspecialchars($website[0]['Parameters']); ?></textarea> <a href="help.php#websiteparameters">?</a></td></tr>
     <tr><td>Server</td><td><select name="serverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE HTTP=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\"" . iif($website[0]['ServerID'] == $servers[$serverid]['ID'], " selected", "") . ">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#websiteserverid">?</a></td></tr>
     <tr><td colspan=2 align=center><input type="submit" value="Update website"></td></tr>
    </table>
