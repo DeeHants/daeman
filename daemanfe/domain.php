@@ -151,9 +151,9 @@ if ($ddetails['DNS'] == "primary") {
     for($row = 0; $row < count($hosts); $row++){
       print "   <tr><td><div class=action><a href=\"?action=edithost&amp;domainid=" . urlencode($domainid) . "&amp;hostid=" . urlencode($hosts[$row]['ID']) . "#hostform\">edit</a> <a href=\"?action=deletehost&amp;domainid=" . urlencode($domainid) . "&amp;hostid=" . urlencode($hosts[$row]['ID']) . "\">delete</a></div></td><td>";
       if ($hosts[$row]['Name'] == ""){
-        print "<a href=\"http://" . urlencode($domainname) . "\" target=_blank>Default</a>";
+        print "<a href=\"http://" . urlencode($domainname) . "\" target=\"_blank\">Default</a>";
       }else{
-        print "<a href=\"http://" . urlencode($hosts[$row]['Name']) . "." . urlencode($domainname) . "\" target=_blank>" . htmlspecialchars($hosts[$row]['Name']) . "</a>";
+        print "<a href=\"http://" . urlencode($hosts[$row]['Name']) . "." . urlencode($domainname) . "\" target=\"_blank\">" . htmlspecialchars($hosts[$row]['Name']) . "</a>";
       }
       print "</td><td>";
       if ($hosts[$row]['Type'] == "website"){

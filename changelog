@@ -1,3 +1,19 @@
+X  0.05
+ * Added the mod_rewrite rules to the update web script when a webiste redirects elsewhere
+ * Add code to not do any updates if Servers.Live is not set
+ * Add a Live and Shell options to the server settings page
+ * Updated the schema
+ * Added Servers.Live and Servers.Shell to signify the server is to update its config it allows shell logins
+06/04/2003
+
+ * Add a website option to redirect elsewhere
+ * Added a Websites.Redirect field to contain a URL to redirect a whole site
+04/04/2003
+
+ * Corrected some syntactical errors in the front end
+X  0.04
+02/04/2003
+
  * Moved the "restarting sendmail" line to before it restarts sendmail
  * Changed the diff nesting in updatemail
  * Removed the @ from most of the mysql functions as it is unnecassary
@@ -5,7 +21,7 @@
  * Updated the schema
  * Added a Servers.FullName field to contain the fully qualified server name
  * Made the updatedns script put the correct IP address for the selected server
-01/03/2003
+01/04/2003
 
 X  0.03
  * Modified all the update scripts to only add the entries that apply to their local server

@@ -11,13 +11,13 @@ print_header("Hosted websites: " . htmlspecialchars($details['RealName']));
 if (isset($action)){
   if (userisadmin($currentuserid)) {
     if ($action == "addwebsite"){
-      if (execute("INSERT INTO Websites (UserID, Name, Trial, Logging, ServerID) VALUES ('" . mysql_escape_string($userid) . "', '" . mysql_escape_string($name) . "','" . mysql_escape_string($trial) . "','" . mysql_escape_string($logging) . "', '" . mysql_escape_string($serverid) . "');")){
+      if (execute("INSERT INTO Websites (UserID, Name, Trial, Logging, Redirect, ServerID) VALUES ('" . mysql_escape_string($userid) . "', '" . mysql_escape_string($name) . "','" . mysql_escape_string($trial) . "','" . mysql_escape_string($logging) . "', '" . mysql_escape_string($redirect). "', '" . mysql_escape_string($serverid) . "');")){
         print "  <p class=status>Website added successfully.</p>\n";
       }else{
         print "  <p class=error>Error adding website.</p>\n";
       }
     }elseif ($action == "updatewebsite"){
-      if (execute("UPDATE Websites SET Name='" . mysql_escape_string($name) . "', Trial='" . mysql_escape_string($trial) . "', Logging='" . mysql_escape_string($logging) . "', ServerID='" . mysql_escape_string($serverid) . "' WHERE ID='" . mysql_escape_string($websiteid) . "';")){
+      if (execute("UPDATE Websites SET Name='" . mysql_escape_string($name) . "', Trial='" . mysql_escape_string($trial) . "', Logging='" . mysql_escape_string($logging) . "', Redirect='" .mysql_escape_string($redirect) . "', ServerID='" . mysql_escape_string($serverid) . "' WHERE ID='" . mysql_escape_string($websiteid) . "';")){
         print "  <p class=status>Website updated successfully.</p>\n";
       }else{
         print "  <p class=error>Error updating website.</p>\n";
@@ -59,7 +59,7 @@ if ($websites){
 
 if (userisadmin($currentuserid)) {
   if ($action == "editwebsite"){
-    $website = execute("SELECT Name, Trial, Logging, ServerID FROM Websites WHERE ID='" . mysql_escape_string($websiteid) . "';");
+    $website = execute("SELECT Name, Trial, Logging, Redirect, ServerID FROM Websites WHERE ID='" . mysql_escape_string($websiteid) . "';");
 ?>
   <a name=websiteform>
   <form action="websites.php" method="POST">
@@ -70,6 +70,7 @@ if (userisadmin($currentuserid)) {
     <tr><td>Website name</td><td><input name="name" value="<?php print htmlspecialchars($website[0]['Name']); ?>"> <a href="help.php#websitename">?</a></td></tr>
     <tr><td>Trial site?</td><td><input type="checkbox" name="trial" value=1<?php if ($website[0]['Trial']) { print " checked"; } ?>> <a href="../help.php#websitetrial">?</a></td></tr>
     <tr><td>Enable Logging</td><td><input type="checkbox" name="logging" value=1<?php if ($website[0]['Logging']) { print " checked"; } ?>> <a href="../help.php#websitelogging">?</a></td></tr>
+    <tr><td>Redirect to</td><td><input name="redirect" value="<?php print htmlspecialchars($website[0]['Redirect']); ?>"> <a href="help.php#websiteredirect">?</a></td></tr>
     <tr><td>Server</td><td><select name="serverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE HTTP=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\"" . iif($website[0]['ServerID'] == $servers[$serverid]['ID'], " selected", "") . ">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#websiteserverid">?</a></td></tr>
     <tr><td colspan=2 align=center><input type="submit" value="Update website"></td></tr>
    </table>
@@ -85,6 +86,7 @@ if (userisadmin($currentuserid)) {
     <tr><td>Name</td><td><input name="name"> <a href="help.php#websitename">?</a></td></tr>
     <tr><td>Trial site?</td><td><input type="checkbox" name="trial" value=1 checked> <a href="../help.php#websitetrial">?</a></td></tr>
     <tr><td>Enable Logging</td><td><input type="checkbox" name="logging" value=1 checked> <a href="../help.php#websitelogging">?</a></td></tr>
+    <tr><td>Redirect to</td><td><input name="redirect" value=""> <a href="help.php#websiteredirect">?</a></td></tr>
     <tr><td>Server</td><td><select name="serverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE HTTP=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select> <a href="help.php#websiteserverid">?</a></td></tr>
     <tr><td colspan=2 align=center><input type="submit" value="Add website"></td></tr>
    </table>

@@ -45,14 +45,14 @@ if ($hosts or $fhosts){
    <tr><th>Actions</th><th>Hostname</th></tr>
 <?php
   for($row = 0; $row < count($hosts); $row++){
-    print "   <tr><td><div class=action><a href=\"?action=edithost&amp;websiteid=" . urlencode($websiteid) . "&amp;hostid=" . urlencode($hosts[$row]['ID']) . "#hostform\">edit</a> <a href=\"?action=deletehost&amp;websiteid=" . urlencode($websiteid) . "&amp;hostid=" . urlencode($hosts[$row]['ID']) . "\">delete</a></div></td><td><a href=\"http://" . urlencode($hosts[$row]['Host']) . "\" target=_blank>" . htmlspecialchars($hosts[$row]['Host']) . "</a></td></tr>\n";
+    print "   <tr><td><div class=action><a href=\"?action=edithost&amp;websiteid=" . urlencode($websiteid) . "&amp;hostid=" . urlencode($hosts[$row]['ID']) . "#hostform\">edit</a> <a href=\"?action=deletehost&amp;websiteid=" . urlencode($websiteid) . "&amp;hostid=" . urlencode($hosts[$row]['ID']) . "\">delete</a></div></td><td><a href=\"http://" . urlencode($hosts[$row]['Host']) . "\" target=\"_blank\">" . htmlspecialchars($hosts[$row]['Host']) . "</a></td></tr>\n";
   }
   for($row = 0; $row < count($fhosts); $row++){
     print "   <tr><td><div class=action>preconfigured<!-- <a href=\"?action=deletealias&amp;domainid=" . urlencode($domainid) . "&amp;aliasid=" . urlencode($fhosts[$row]['ID']) . "\">delete</a>--></div></td><td>";
     if ($fhosts[$row]['Name'] == ""){
-      print "<a href=\"http://" . urlencode($fhosts[$row]['DomainName']) . "\" target=_blank>" . htmlspecialchars($fhosts[$row]['DomainName']) ."</a>";
+      print "<a href=\"http://" . urlencode($fhosts[$row]['DomainName']) . "\" target=\"_blank\">" . htmlspecialchars($fhosts[$row]['DomainName']) ."</a>";
     }else{
-      print "<a href=\"http://" . urlencode($fhosts[$row]['Name']) . "." . urlencode($fhosts[$row]['DomainName']) . "\" target=_blank>" . htmlspecialchars($fhosts[$row]['Name']) . "." . htmlspecialchars($fhosts[$row]['DomainName']) . "</a>";
+      print "<a href=\"http://" . urlencode($fhosts[$row]['Name']) . "." . urlencode($fhosts[$row]['DomainName']) . "\" target=\"_blank\">" . htmlspecialchars($fhosts[$row]['Name']) . "." . htmlspecialchars($fhosts[$row]['DomainName']) . "</a>";
     }
     print "</td></tr>\n";
   }
@@ -93,7 +93,7 @@ if ($action == "edithost"){
 
 print "  <h2>Tools</h2>\n";
 if ($detailsw['Trial']) {
-  print "  <p>The development site is available at <a href=\"http://" . urlencode($detailsw['Name']) . ".trial.earlsoft.co.uk/\" target=_blank>" . urlencode($detailsw['Name']) . ".trial.earlsoft.co.uk</a>\n";
+  print "  <p>The development site is available at <a href=\"http://" . urlencode($detailsw['Name']) . ".trial.earlsoft.co.uk/\" target=\"_blank\">" . urlencode($detailsw['Name']) . ".trial.earlsoft.co.uk</a>\n";
 }
 if ($detailsw['Logging']) {
   print "  <p>We use analog to recreate the logs every 6 hours (6:00 and 12:00). <a href=\"http://logs.earlsoft.co.uk/" . urlencode($detailsw['Name']) . ".htm\">View logs</a>\n";

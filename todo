@@ -1,5 +1,5 @@
 DaeManFE
- * Use fully qualified names from the database instead of hard coded
+ * Add very extensive input checking
  * Disable options that dont apply because of other settings
  * Disable forms for users that don't have hosted accounts
  * Add LOADS of comments
@@ -7,6 +7,7 @@ DaeManFE
  * Rewrite the forms to use mysql_query instead of the execute function
 
 DaeManD
+ * Use fully qualified names from the database instead of hard coded
  * Add LOADS of comments
  * Write scripts to update user accounts
  * Write scripts to update MySQLs users

@@ -2,7 +2,7 @@
 copy($HTTPConfig . ".static", $HTTPConfig . ".new");
 $configfile = fopen($HTTPConfig . ".new", "a");
 
-$websites = mysql_query("SELECT Websites.ID, Websites.Name, Trial, Logging, Users.Name AS UserName FROM Websites LEFT JOIN Users ON Users.ID = Websites.UserID WHERE Enabled=1 AND Hosting=1 AND ServerID='" . mysql_escape_string($localserverid) . "' ORDER BY Name;", $link);
+$websites = mysql_query("SELECT Websites.ID, Websites.Name, Trial, Logging, Redirect, Users.Name AS UserName FROM Websites LEFT JOIN Users ON Users.ID = Websites.UserID WHERE Enabled=1 AND Hosting=1 AND ServerID='" . mysql_escape_string($localserverid) . "' ORDER BY Name;", $link);
 for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
   $website = mysql_fetch_array($websites);
 
@@ -32,35 +32,47 @@ for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
         fputs($configfile, "\tServerAlias " . $names[$row] . "\n");
       }
     }
-    fputs($configfile, "\tDocumentRoot /home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/\n");
-    if ($website['Logging']) {
-      fputs($configfile, "\tCustomLog /home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log combined\n");
-    } else {
-      fputs($configfile, "\tCustomLog /dev/null combined\n");
-    }
-    fputs($configfile, "</VirtualHost>\n");
 
-    if (!file_exists("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/")) {
-      print "Creating website directory " . $website['Name'] . " for " . $website['UserName'] . "\n";
-      mkdir("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", 0750);
-      chown("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", $website['UserName']);
-      chgrp("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", "apache");
-
-      symlink("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", "/data/websites/live/" . $website['Name']);
-    }
-
-    if ($website['Logging']) {
-      if (!file_exists("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log")) {
-        print "Creating website log " . $website['Name'] . " for " . $website['UserName'] . "\n";
-        touch("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log");
-        chmod("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", 0640);
-        chown("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", $website['UserName']);
-        chgrp("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", "apache");
-
-        symlink("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", "/data/logs/" . $website['Name'] . "_log");
+    if ($website['Redirect'] == "") {
+      fputs($configfile, "\tDocumentRoot /home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/\n");
+      if ($website['Logging']) {
+        fputs($configfile, "\tCustomLog /home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log combined\n");
+      } else {
+        fputs($configfile, "\tCustomLog /dev/null combined\n");
       }
-    }
+      fputs($configfile, "</VirtualHost>\n");
 
+      if (!file_exists("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/")) {
+        print "Creating website directory " . $website['Name'] . " for " . $website['UserName'] . "\n";
+        mkdir("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", 0750);
+        chown("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", $website['UserName']);
+        chgrp("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", "apache");
+
+        symlink("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/", "/data/websites/live/" . $website['Name']);
+      }
+
+      if ($website['Logging']) {
+        if (!file_exists("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log")) {
+          print "Creating website log " . $website['Name'] . " for " . $website['UserName'] . "\n";
+          touch("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log");
+          chmod("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", 0640);
+          chown("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", $website['UserName']);
+          chgrp("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", "apache");
+
+          symlink("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", "/data/logs/" . $website['Name'] . "_log");
+        }
+      }
+
+    } else {
+      if (substr(strtolower($website['Redirect']), 0, 7) != "http://") { $website['Redirect'] = "http://" . $website['Redirect']; }
+      if (substr($website['Redirect'], -1, 1) != "/") { $website['Redirect'] = $website['Redirect'] . "/"; }
+
+      fputs($configfile, "\tCustomLog /dev/null combined\n");
+      fputs($configfile, "\tRewriteEngine On\n");
+      fputs($configfile, "\tRewriteRule ^/(.*) " . $website['Redirect'] . "$1 [R]\n");
+      fputs($configfile, "</VirtualHost>\n");
+
+    }
   }
   mysql_free_result($hosts);
   mysql_free_result($fhosts);

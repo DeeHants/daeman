@@ -12,20 +12,23 @@ mysql_select_db ($DBName, $link);
 
 // Get the settings that apply to the current server
 $hostname = exec("hostname -s");
-$servers = mysql_query ("SELECT ID, DNS, Mail, HTTP, DB FROM Servers WHERE Name='" . mysql_escape_string($hostname) . "';", $link);
+$servers = mysql_query ("SELECT ID, Live, DNS, Mail, HTTP, DB FROM Servers 
+WHERE Name='" . mysql_escape_string($hostname) . "';", $link);
 if (mysql_num_rows($servers) == 0) {
   mysql_free_result($servers);
   print "There is no entry for this server.\n";
 } else {
   $server = mysql_fetch_array($servers);
   mysql_free_result($servers);
-  $localserverid = $server['ID'];
+  if ($server['Live']) {
+    $localserverid = $server['ID'];
 
-  // Update everything as necessary
-  include("updateusers");
-  if ($server['Mail']) { include("updatemail"); }
-  if ($server['DNS']) { include("updatedns"); }
-  if ($server['HTTP']) { include("updateweb"); }
+    // Update everything as necessary
+    include("updateusers");
+    if ($server['Mail']) { include("updatemail"); }
+    if ($server['DNS']) { include("updatedns"); }
+    if ($server['HTTP']) { include("updateweb"); }
+  }
 }
 
 // Clean up
