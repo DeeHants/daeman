@@ -58,7 +58,7 @@ fclose($userfile);
 fclose($relayfile);
 fclose($mailerfile);
 
-$changed = diff($MailVirtUserTable) || diff($MailAliases) || diff($MailRelayDomains) || diff($MailMailerTable);
+$changed = diff($MailVirtUserTable) || diff($MailAliases) || diff($MailRelayDomains) || diff($MailMailerTable) || diff($MailLocalHostNames);
 
 if ($changed == 0) {
   unlink($MailVirtUserTable . ".new");

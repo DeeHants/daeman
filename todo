@@ -11,4 +11,5 @@ DaeManD
  * Add LOADS of comments
  * Write scripts to update user accounts
  * Write scripts to update MySQLs users
+ * Write scripts to update Mailman lists
  * Optimise SQL queries

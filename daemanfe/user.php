@@ -8,6 +8,7 @@ print_header("Account administration: " . htmlspecialchars($details['RealName'])
   <p>Edit your <a href="domains.php?userid=<?php print urlencode($userid) ?>">hosted domains</a>.</p>
   <h2>Mail accounts</h2>
   <p>Edit your <a href="accounts.php?userid=<?php print urlencode($userid) ?>">POP3/IMAP mail accounts</a>.</p>
+  <p>Edit your <a href="lists.php?userid=<?php print urlencode($userid) ?>">mailing lists</a>.</p>
   <h2>Websites</h2>
   <p>Edit your <a href="websites.php?userid=<?php print urlencode($userid) ?>">website details</a>.</p>
 <?php

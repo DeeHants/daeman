@@ -76,6 +76,22 @@ CREATE TABLE Hosts (
 # --------------------------------------------------------
 
 #
+# Table structure for table `Lists`
+#
+
+CREATE TABLE Lists (
+  ID int(10) unsigned NOT NULL auto_increment,
+  UserID int(10) unsigned NOT NULL default '0',
+  Name varchar(255) NOT NULL default '',
+  Owner varchar(255) NOT NULL default '',
+  Public tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (ID),
+  UNIQUE KEY Name (Name),
+  KEY CustomerID (UserID)
+) TYPE=MyISAM;
+# --------------------------------------------------------
+
+#
 # Table structure for table `Servers`
 #
 
@@ -89,6 +105,7 @@ CREATE TABLE Servers (
   Mail tinyint(1) NOT NULL default '0',
   HTTP tinyint(1) NOT NULL default '0',
   DB tinyint(1) NOT NULL default '0',
+  List tinyint(1) NOT NULL default '0',
   Shell tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (ID),
   UNIQUE KEY Address (Address),

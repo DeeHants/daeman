@@ -67,3 +67,19 @@ X  0.06
  * Made it split up the parameters and add them preceded with a tab
  * Added the UI to set the extra VHost directives
 X  0.07
+
+28/04/2003
+ * Fixed a problem with the apache update scripts adding vhosts when they have no hosts
+
+08/05/2003
+ * Made it check the localhostnames file had changed as well
+
+12/05/2003
+ * Added Servers.List as a flag for whether the server runs a mailing list manager
+ * Added code to update the DB and list server if the flag is set
+ * Added the List option to the Servers page
+ * Added a lists table
+ * Added a form for mailing List
+ * Added a link to the mailing list page from the user page
+ * Updated the schema
+
