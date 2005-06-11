@@ -66,6 +66,7 @@ for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
         mysql_free_result($accounts);
 	
         fputs($aliasfile, "\n");
+
       } elseif ($alias['Type'] == "list") {
         fputs($aliasfile, $domain['Name']);
         if ($alias['Name'] != "") { fputs($aliasfile, "_" . $alias['Name']); } else { $addeddefault = true; }
@@ -77,11 +78,25 @@ for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
         mysql_free_result($lists);
 	
         fputs($aliasfile, "\n");
+
+/*
+      } elseif ($alias['Type'] == "reject") {
+        fputs($aliasfile, $domain['Name']);
+        if ($alias['Name'] != "") { fputs($aliasfile, "_" . $alias['Name']); } else { $addeddefault = true; }
+        fputs($aliasfile, ":\terror:nouser ARGH!");
+
+        fputs($aliasfile, "\n");
+*/
       }
 
-      fputs($userfile, $alias['Name'] . "@" . $domain['DomainName'] . "\t" . $domain['Name']);
-      if ($alias['Name'] != "") { fputs($userfile, "_" . $alias['Name']); }
-      fputs($userfile, "\n");
+      if ($alias['Type'] == "reject") {
+        fputs($userfile, $alias['Name'] . "@" . $domain['DomainName'] . "\terror:67 550 User unknown\n");
+        if ($alias['Name'] == "") { $addeddefault = true; }
+      } else {
+        fputs($userfile, $alias['Name'] . "@" . $domain['DomainName'] . "\t" . $domain['Name']);
+        if ($alias['Name'] != "") { fputs($userfile, "_" . $alias['Name']); }
+        fputs($userfile, "\n");
+      }
     }
     mysql_free_result($aliases);
 
@@ -138,12 +153,24 @@ for ($accountid = 0; $accountid < mysql_num_rows($accounts); $accountid++)
 {
   $account = mysql_fetch_array($accounts);
 
-  exec("grep /etc/passwd -ie '" . $account['UserName'] . "-" . $account['Name'] . "'", $output, $ecode);
+  unset($output);
+  exec("grep /etc/passwd -ie '^" . $account['UserName'] . "-" . $account['Name'] . ":'", $output, $ecode);
+  exec("grep /etc/shadow -ie '^" . $account['UserName'] . "-" . $account['Name'] . ":'", $output, $ecode2);
   if ($ecode == 1) {
     print "Creating account " . $account['Name'] . " for " . $account['UserName'] . "\n";
-    system("/sbin/useradd -u " . $account['AccountID'] . " -s '/sbin/nologin' -c '" . $account['RealName'] . "' -p '" . $account['Password'] . "' " . $account['UserName'] . "-" . $account['Name']);
+    system("/usr/sbin/useradd -u " . $account['AccountID'] . " -s '/sbin/nologin' -c '" . $account['RealName'] . "' -p '" . $account['Password'] . "' " . $account['UserName'] . "-" . $account['Name']);
+
   } else {
-    //user exists, update!!!
+    $userinfo = array_merge(split(":", $output[0]), split(":", $output[1]));
+
+    if ($userinfo[8] != $account['Password']) {
+      print "Updating the PAM password for account " . $account['Name'] . " for " . $account['UserName'] . "\n";
+      system("/usr/sbin/usermod -p '" . $account['Password'] . "' " . $account['UserName'] . "-" . $account['Name']);
+    }
+    if ($userinfo[4] != $account['RealName']) {
+      print "Updating the real name for account " . $account['Name'] . " for " . $account['UserName'] . "\n";
+      system("/usr/sbin/usermod -c '" . $account['RealName'] . "' " . $account['UserName'] . "-" . $account['Name']);
+    }
   }
 }
 mysql_free_result($accounts);

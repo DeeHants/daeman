@@ -95,4 +95,13 @@ function iif($expression, $truevalue, $falsevalue) {
     return $falsevalue;
   }
 }
+
+function optionlist($items, $selected = "") {
+//  print "<!--"; print_r($items); print_r($selected); print "-->";
+  $data = "";
+  for ($itemid = 0; $itemid < count($items); $itemid++) {
+    $data = $data . "<option value=\"" . htmlspecialchars($items[$itemid][0]) . "\"" . iif($items[$itemid][0] == $selected, " selected", "") . ">" . htmlspecialchars($items[$itemid][1]);
+  }
+  return $data;
+}
 ?>

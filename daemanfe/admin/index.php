@@ -9,7 +9,7 @@ print_header("System administration");
   <h2>Users</h2>
   <p>Edit your <a href="users.php">Users</a>.</p>
   <h2>Servers</h2>
-  <p>Edit your <a href="servers.php">Servers</a>.</p>
+  <p>Edit your <a href="servers.php">Servers</a> or the global <a href="config.php">configuration</a>. (To configure individual servers, go to the servers page and click config.)</p>
   <h2>System summary</h2>
   <p>View a <a href="summary.php">summary</a> of all the users/domains/accounts/websites on the system in a tree structure.</p>
 <?php

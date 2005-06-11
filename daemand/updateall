@@ -38,7 +38,7 @@ if (mysql_num_rows($servers) == 0) {
 
     #Contributed scripts
     for ($contribid = 0; $contribid < count($Contribs); $contribid++) {
-      if (file_exists("update" . $Contribs[$contribid])) { include("update" . $Contribs[$contribid]); }
+      if (file_exists("./" . $Contribs[$contribid])) { include("./" . $Contribs[$contribid]); }
     }
 
     $servers = mysql_query ("UPDATE Servers SET Updated=Now() WHERE ID='" . mysql_escape_string($localserverid) . "';", $link);

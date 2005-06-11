@@ -1,0 +1,30 @@
+<?php
+// Copy the static config files and open them for appending
+$accessfile = openconfig("/etc/mail/access");
+
+$users = mysql_query("SELECT Address, Description FROM systems.RelayAccess ORDER BY Description,Address;", $link);
+print mysql_error($link);
+for ($userid = 0; $userid < mysql_num_rows($users); $userid++) {
+  $user = mysql_fetch_array($users);
+
+//  print $user['Description'] . ", " . $user['Address'] . "\n";
+  fputs($accessfile, "#" . $user['Description'] . "\n" . $user['Address'] . "\t\tRELAY\n");
+}
+mysql_free_result($users);
+
+fclose($accessfile);
+
+$changed = diff("/etc/mail/access");
+
+if ($changed == 0) {
+  unlink("/etc/mail/access" . ".new");
+} else {
+  system("chmod --reference " . "/etc/mail/access" . " " . "/etc/mail/access" . ".new");
+
+  rename("/etc/mail/access" . ".new", "/etc/mail/access");
+
+  system("makemap -f hash " . "/etc/mail/access" . ".db < " . "/etc/mail/access");
+  print "Restarting sendmail\n";
+  system($MailSendmailInit . " restart >/dev/null");
+}
+?>

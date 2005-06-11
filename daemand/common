@@ -22,4 +22,32 @@ function mysql_to_date($datestr) {
   $unixtime = mktime($hours, $mins, $seconds, $month, $day, $year);
   return $unixtime;
 }
+
+function getsettings($name) {
+  global $localserverid;
+
+  $settings = mysql_query("SELECT Value FROM Config WHERE ServerID='" . mysql_escape_string($localserverid) . "' AND Name='" . mysql_escape_string($name) . "';");
+  for ($settingid = 0; $settingid < mysql_num_rows($settings); $settingid++) {
+    $setting = mysql_fetch_array($settings);
+    $allsettings[] = $setting['Value'];
+  }
+  if (count($allsettings) == 0) {
+    $settings = mysql_query("SELECT Value FROM Config WHERE ServerID='0' AND Name='" . mysql_escape_string($name) . "';");
+    for ($settingid = 0; $settingid < mysql_num_rows($settings); $settingid++) {
+      $setting = mysql_fetch_array($settings);
+      $allsettings[] = $setting['Value'];
+    }
+  }
+
+  return $allsettings;
+}
+
+function getsetting($name) {
+  $settings = getsettings($name);
+  if (is_array($settings)) {
+    return $settings[0];
+  } else {
+    return $settings;
+  }
+}
 ?>

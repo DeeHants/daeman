@@ -27,7 +27,7 @@ function print_header($title) {
 
 function print_footer() {
 ?>
-  <p class=footer><a href="http://sourceforge.net/projects/daeman/">Daeman 0.12</a> written by <a href="http://www.earlsoft.co.uk/">Earl Software</a> 2003</p>
+  <p class=footer><a href="http://sourceforge.net/projects/daeman/" target="_blank">Daeman 0.13</a> written by <a href="http://www.earlsoft.co.uk/" target="_blank">Earl Software</a> 2005</p>
  </body>
 </html>
 <?php

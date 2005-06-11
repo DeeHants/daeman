@@ -52,9 +52,13 @@ function execute($sql) {
 }
 
 function mysql_to_date($datestr) {
+  # Split into date and time parts
   list($date, $time) = split(' ', trim($datestr));
+  # Split date into sub parts
   list($year, $month, $day) = split('-', $date);
+  # Split time into sub parts
   list($hours, $mins, $seconds) = split(':', $time);
+  # Build a unix time from the parts
   $unixtime = mktime($hours, $mins, $seconds, $month, $day, $year);
   return $unixtime;
 }

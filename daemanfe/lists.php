@@ -30,7 +30,7 @@ if (isset($_REQUEST['action'])) {
   }
 }
 
-$lists = execute("SELECT ID, Name, Owner, Public FROM Lists WHERE UserID='" . mysql_escape_string($details['ID']) . "';");
+$lists = execute("SELECT ID, Name, Owner, Public FROM Lists WHERE UserID='" . mysql_escape_string($details['ID']) . "' ORDER BY Name;");
 
 if ($lists) {
 ?>
@@ -47,37 +47,35 @@ if ($lists) {
   print "  <p>There are no mailing lists</p>\n";
 }
 
+$fill = array();
 if ($_REQUEST['action'] == "editlist") {
-  $list = execute("SELECT Name, Owner, Public, ServerID FROM Lists WHERE ID = " . mysql_escape_string($_REQUEST['listid']) . " ORDER BY Name;");
-?>
-  <form action="lists.php" method="POST">
-   <input name="action" type="hidden" value="updatelist">
-   <input name="userid" type="hidden" value="<?php print htmlspecialchars($details['ID']); ?>">
-   <input name="listid" type="hidden" value="<?php print htmlspecialchars($_REQUEST['listid']); ?>">
-   <table>
-    <tr><td>List name</td><td><?php print htmlspecialchars($list[0]['Name']); ?></td></tr>
-    <tr><td>Owner</td><td><input name="owner" value="<?php print htmlspecialchars($list[0]['Owner']); ?>"></td></tr>
-    <tr><td>Public</td><td><input type="checkbox" name="public" value=1<?php if ($list[0]['Public']) { print " checked"; } ?>></td></tr>
-    <tr><td>Server</td><td><select name="serverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE List=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\"" . iif($website[0]['ServerID'] == $servers[$serverid]['ID'], " selected", "") . ">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select></td></tr>
-    <tr><td colspan=2 align=center><input type="submit" value="Update list"></td></tr>
-   </table>
-  </form>
-<?php
-} else {
-?>
-  <form action="lists.php" method="POST">
-   <input name="action" type="hidden" value="addlist">
-   <input name="userid" type="hidden" value="<?php print htmlspecialchars($details['ID']); ?>">
-   <table>
-    <tr><td>List name</td><td><input name="name"></td></tr>
-    <tr><td>Owner</td><td><input name="owner"></td></tr>
-    <tr><td>Public</td><td><input type="checkbox" name="public" value=1></td></tr>
-    <tr><td>Server</td><td><select name="serverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE List=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select></td></tr>
-    <tr><td colspan=2 align=center><input type="submit" value="Add new list"></td></tr>
-   </table>
-  </form>
-<?php
+  $list = execute("SELECT Name, Owner, Public, ServerID FROM Lists WHERE ID = " . mysql_escape_string($_REQUEST['listid']) . ";");
+  $fill['id'] = $_REQUEST['listid'];
+  $fill['name'] = $list[0]['Name'];
+  $fill['owner'] = $list[0]['Owner'];
+  $fill['public'] = $list[0]['Public'];
+  $fill['serverid'] = $website[0]['ServerID'];
 }
+?>
+  <form action="lists.php" method="POST">
+   <input name="action" type="hidden" value="<?php print iif(isset($fill['id']), "update", "add"); ?>list">
+   <input name="userid" type="hidden" value="<?php print htmlspecialchars($details['ID']); ?>">
+<?php if (isset($fill['id'])) { ?>
+   <input name="listid" type="hidden" value="<?php print htmlspecialchars($fill['id']); ?>">
+<?php } ?>
+   <table>
+<?php if (isset($fill['id'])) { ?>
+    <tr><td>List name</td><td><?php print htmlspecialchars($fill['name']); ?></td></tr>
+<?php } else { ?>
+    <tr><td>List name</td><td><input name="name" value="<?php print htmlspecialchars($fill['name']); ?>"></td></tr>
+<?php } ?>
+    <tr><td>Owner</td><td><input name="owner" value="<?php print htmlspecialchars($fill['owner']); ?>"></td></tr>
+    <tr><td>Public</td><td><input type="checkbox" name="public" value=1<?php if ($fill['public']) { print " checked"; } ?>></td></tr>
+    <tr><td>Server</td><td><select name="serverid"><?php print optionlist(execute("SELECT ID, Name FROM Servers WHERE List=1 ORDER BY Name;"), $website[0]['serverid']); ?></select></td></tr>
+    <tr><td colspan=2 align=center><input type="submit" value="<?php print iif(isset($fill['id']), "Update", "Add"); ?> list"></td></tr>
+   </table>
+  </form>
+<?php
 
 print_footer();
 ?>

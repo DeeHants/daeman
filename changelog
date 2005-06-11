@@ -61,7 +61,7 @@ X  0.06
 
 27/04/2003
  * Reversed the changelog file so it is in a sensible order!
- * Added a Websites.Parameters filed to hold extra Apache vhost directives
+ * Added a Websites.Parameters field to hold extra Apache vhost directives
  * Updated the schema
  * Added code to add the website parameters to the config file
  * Made it split up the parameters and add them preceded with a tab
@@ -199,7 +199,7 @@ X  0.11
  * Swapped the "System administration" and "tools" links on the home page
 
 18/01/2004
- * Switched to the recommended way of specifiing apache virtualhosts
+ * Switched to the recommended way of specifying apache virtualhosts
 
 26/01/2004
  * Added a "contrib" system to run arbitrary scripts
@@ -209,6 +209,81 @@ X  0.11
  * Moved the mail account creation code to updatemail
  * Added code to handle password changes, handle accounts being disabled, as well as name changes
 
-12/01/2004
+12/02/2004
  * Added a "change mail account password" option
 X  0.12
+
+13/02/2004
+ * Added a config table, and functions to read the settings
+
+15/02/2004
+ * Added a admin page to view/control the settings
+ * Added code to set the error log for the vhosts if logging is enabled
+
+16/02/2004
+ * Created a quicksetup page to add a domain, website and all the hosts/aliases, with a link from the account admin page
+ * Added the correct DNS server IP to the gradwell upload script
+ * Removed the "update" from the beginning of the contrib scripts
+ * Expanded on some bits of text in the frontend
+
+09/03/2004
+ * Made the website ID/hostname unique rather than just the hostname
+
+16/03/2004
+ * Added a reject option to the email aliases
+ * Added an entry to the aliases list when a default doesn't exist
+ * Removed the check for no aliases existing in the domain page
+
+22/03/2004
+ * Sorted the server select lists
+ * Added sorting to the domain, account, list, and website lists
+ * Made the footer links open a new page
+
+25/03/2004
+ * Added a rudimentary DNS lookup page
+
+05/04/2004
+ * Added an optionlist function which builds the options for a select list
+ * Fixed the alias lists and accounts  not being selected properly
+ * Moved all the select lists over to the option list fucntion
+ * Moved the alias and host sections over to a prefilled array
+
+07/04/2004
+ * Moved the output flush from the lookup function into whois.php
+
+16/04/2004
+ * Hid the server updated field if it has never updated
+ * Made it use the error style if its more than 24 hours ago
+ * Revised the config option name formatting
+
+17/04/2004
+ * Moved domains, accounts, lists, and websites over to the prefill array style
+ * Made the website and domain name read only when editing existing entries
+ * Changed the footer year to 2004
+
+19/04/2004
+ * Moved the domain editing form into the domain page
+ * Added a link on the domains page to add a new domain
+
+22/06/2004
+ * Added an scriptalias for cgi-bin in each vhost
+ * Stopped the website editing form removing the name
+
+27/06/2004
+ * Added code to handle account password and username changes
+ * Added an "initial password" to the new account page
+ * Added some text to the mail account page describing the full user name
+
+12/07/2004
+ * Added support to the whois page to query an ISPs server
+
+02/01/2005
+ * Shown the domain name even if its not included int he whois info
+ * Added .org registrar info to the whois parser
+
+11/06/2005
+ * Fixed the javascript on the domain page to work on Mozilla based browsers
+
+11/06/2005
+ * Moved files in daeman.tgz into a seperate versioned dir
+X  0.13

@@ -152,8 +152,7 @@ CREATE TABLE `WebsiteHosts` (
   `WebsiteID` int(10) unsigned NOT NULL default '0',
   `Host` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`ID`),
-  UNIQUE KEY `Host` (`Host`),
-  KEY `WebsiteID` (`WebsiteID`)
+  UNIQUE KEY `HostKey` (`Host`,`WebsiteID`)
 ) TYPE=MyISAM;
 
 #

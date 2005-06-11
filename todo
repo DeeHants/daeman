@@ -3,8 +3,10 @@ DaeManFE
  * Disable forms for users that don't have hosted accounts
  * Add LOADS of comments
  * Rewrite the forms to use mysql_query instead of the execute function
+ * Added the account name to the change password page
 
 DaeManD
  * Add LOADS of comments
  * Write scripts to update MySQLs users
  * Write scripts to update Mailman lists
+ * Make it reject email with 5.1.1 instead of 5.0.0

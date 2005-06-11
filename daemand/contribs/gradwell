@@ -1,0 +1,26 @@
+<?php
+$domainlist = "earlsoft.co.uk:81.187.36.50\n";
+$domains = mysql_query("SELECT DomainName, Servers.Address FROM (Domains LEFT JOIN Users ON Domains.UserID=Users.ID) LEFT JOIN Servers ON Domains.DNSServerID=Servers.ID WHERE Domains.DNS='primary' AND Users.Enabled='1' ORDER BY DomainName;");
+
+for ($domainid = 0; $domainid < mysql_num_rows($domains); $domainid++) {
+  $domain = mysql_fetch_array($domains);
+  $domainlist .= $domain['DomainName'] . ":" . $domain['Address'] . "\n";
+}
+
+$ftpconn = @ftp_connect("ftp.gradwell.net");
+if (!$ftpconn) {
+  print "Failed to connect to the Gradwell server\n";
+} else {
+  if (!@ftp_login($ftpconn, getsetting("GradwellUser"), getsetting("GradwellPass"))) {
+    print "Failed to log in to the Gradwell server\n";
+  } else {
+    $file = tmpfile();
+    fwrite($file, $domainlist);
+    rewind($file);
+    ftp_fput($ftpconn, "zones.secdns", $file, FTP_ASCII);
+    fclose($file); // this removes the file
+  }
+
+  ftp_quit($ftpconn);
+}
+?>

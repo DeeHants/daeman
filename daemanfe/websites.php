@@ -17,7 +17,7 @@ if (isset($_REQUEST['action'])) {
         print "  <p class=error>Error adding website.</p>\n";
       }
     } elseif ($_REQUEST['action'] == "updatewebsite") {
-      if (execute("UPDATE Websites SET Name='" . mysql_escape_string($_REQUEST['name']) . "', Logging='" . mysql_escape_string($_REQUEST['logging']) . "', Redirect='" .mysql_escape_string($_REQUEST['redirect']) . "', Parameters='" . mysql_escape_string($_REQUEST['parameters']) . "', ServerID='" . mysql_escape_string($_REQUEST['serverid']) . "' WHERE ID='" . mysql_escape_string($_REQUEST['websiteid']) . "';")) {
+      if (execute("UPDATE Websites SET Logging='" . mysql_escape_string($_REQUEST['logging']) . "', Redirect='" .mysql_escape_string($_REQUEST['redirect']) . "', Parameters='" . mysql_escape_string($_REQUEST['parameters']) . "', ServerID='" . mysql_escape_string($_REQUEST['serverid']) . "' WHERE ID='" . mysql_escape_string($_REQUEST['websiteid']) . "';")) {
         print "  <p class=status>Website updated successfully.</p>\n";
       } else {
         print "  <p class=error>Error updating website.</p>\n";
@@ -36,7 +36,7 @@ if (isset($_REQUEST['action'])) {
   }
 }
 
-$websites = execute("SELECT ID, Name, Logging, Redirect FROM Websites WHERE UserID='" . mysql_escape_string($details['ID']) . "';");
+$websites = execute("SELECT ID, Name, Logging, Redirect FROM Websites WHERE UserID='" . mysql_escape_string($details['ID']) . "' ORDER BY Name;");
 
 if ($websites) {
 ?>
@@ -58,40 +58,40 @@ if ($websites) {
 }
 
 if ($_SESSION['userisadmin']) {
+  $fill = array();
   if ($_REQUEST['action'] == "editwebsite") {
     $website = execute("SELECT Name, Logging, Redirect, Parameters, ServerID FROM Websites WHERE ID='" . mysql_escape_string($_REQUEST['websiteid']) . "';");
-?>
-  <a name=websiteform></a>
-  <form action="websites.php" method="POST">
-   <input name="action" type="hidden" value="updatewebsite">
-   <input name="userid" type="hidden" value="<?php print htmlspecialchars($details['ID']); ?>">
-   <input name="websiteid" type="hidden" value="<?php print htmlspecialchars($_REQUEST['websiteid']); ?>">
-   <table>
-    <tr><td>Website name</td><td><input name="name" value="<?php print htmlspecialchars($website[0]['Name']); ?>"></td></tr>
-    <tr><td>Enable Logging</td><td><input type="checkbox" name="logging" value=1<?php if ($website[0]['Logging']) { print " checked"; } ?>></td></tr>
-    <tr><td>Redirect to</td><td><input name="redirect" value="<?php print htmlspecialchars($website[0]['Redirect']); ?>"></td></tr>
-    <tr><td>VHost directives</td><td><textarea name="parameters" rows=3 cols=40><?php print htmlspecialchars($website[0]['Parameters']); ?></textarea></td></tr>
-    <tr><td>Server</td><td><select name="serverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE HTTP=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\"" . iif($website[0]['ServerID'] == $servers[$serverid]['ID'], " selected", "") . ">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select></td></tr>
-    <tr><td colspan=2 align=center><input type="submit" value="Update website"></td></tr>
-   </table>
-  </form>
-<?php
-  } else {
-?>
-  <a name=websiteform></a>
-  <form action="websites.php" method="POST">
-   <input name="action" type="hidden" value="addwebsite">
-   <input name="userid" type="hidden" value="<?php print htmlspecialchars($details['ID']); ?>">
-   <table>
-    <tr><td>Name</td><td><input name="name"></td></tr>
-    <tr><td>Enable Logging</td><td><input type="checkbox" name="logging" value=1 checked></td></tr>
-    <tr><td>Redirect to</td><td><input name="redirect" value=""></td></tr>
-    <tr><td>Server</td><td><select name="serverid"><?php $servers = execute("SELECT ID, Name FROM Servers WHERE HTTP=1;"); for ($serverid = 0; $serverid < count($servers); $serverid++) { print "<option value=\"" . htmlspecialchars($servers[$serverid]['ID']) . "\">" . htmlspecialchars($servers[$serverid]['Name']); } ?></select></td></tr>
-    <tr><td colspan=2 align=center><input type="submit" value="Add website"></td></tr>
-   </table>
-  </form>
-<?php
+    $fill['id'] = $_REQUEST['websiteid'];
+    $fill['name'] = $website[0]['Name'];
+    $fill['logging'] = $website[0]['Logging'];
+    $fill['redirect'] = $website[0]['Redirect'];
+    $fill['parameters'] = $website[0]['Parameters'];
+    $fill['serverid'] = $website[0]['ServerID'];
   }
+?>
+  <a name=websiteform></a>
+  <form action="websites.php" method="POST">
+   <input name="action" type="hidden" value="<?php print iif(isset($fill['id']), "update", "add"); ?>website">
+   <input name="userid" type="hidden" value="<?php print htmlspecialchars($details['ID']); ?>">
+<?php if (isset($fill['id'])) { ?>
+   <input name="websiteid" type="hidden" value="<?php print htmlspecialchars($fill['id']); ?>">
+<?php } ?>
+   <table>
+<?php if (isset($fill['id'])) { ?>
+    <tr><td>Website name</td><td><?php print htmlspecialchars($fill['name']); ?></td></tr>
+<?php } else { ?>
+    <tr><td>Website name</td><td><input name="name" value="<?php print htmlspecialchars($fill['name']); ?>"></td></tr>
+<?php } ?>
+    <tr><td>Enable logging</td><td><input type="checkbox" name="logging" value=1<?php if ($fill['logging']) { print " checked"; } ?>></td></tr>
+    <tr><td>Redirect to</td><td><input name="redirect" value="<?php print htmlspecialchars($fill['redirect']); ?>"></td></tr>
+<?php if (isset($fill['id'])) { ?>
+    <tr><td>VHost directives</td><td><textarea name="parameters" rows=3 cols=40><?php print htmlspecialchars($fill['parameters']); ?></textarea></td></tr>
+<?php } ?>
+    <tr><td>Server</td><td><select name="serverid"><?php print optionlist(execute("SELECT ID, Name FROM Servers WHERE HTTP=1 ORDER BY Name;"), $fill['serverid']); ?></select></td></tr>
+    <tr><td colspan=2 align=center><input type="submit" value="<?php print iif(isset($fill['id']), "Update", "Add"); ?> website"></td></tr>
+   </table>
+  </form>
+<?php
 }
 
 print_footer();

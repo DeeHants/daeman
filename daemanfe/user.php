@@ -9,7 +9,7 @@ print_header("Account administration: " . htmlspecialchars($details['RealName'])
 ?>
   <h3><a href="index.php">Home</a> - Account</h3>
   <h2>Domains</h2>
-  <p>Edit your <a href="domains.php?userid=<?php print urlencode($details['ID']) ?>">hosted domains</a>.</p>
+  <p>Edit your <a href="domains.php?userid=<?php print urlencode($details['ID']) ?>">domains</a>, and manage all the hosts/email addresses.</p>
 <?php
 if ($hasmail || $haslist) {
 ?>
@@ -29,7 +29,13 @@ if ($hasmail || $haslist) {
 if ($hashttp) {
 ?>
   <h2>Websites</h2>
-  <p>Edit your <a href="websites.php?userid=<?php print urlencode($details['ID']) ?>">website details</a>.</p>
+  <p>Edit the list of <a href="websites.php?userid=<?php print urlencode($details['ID']) ?>">hosted websites</a> and their hosts.</p>
+<?php
+}
+if ($hasmail || $hashttp) {
+?>
+  <h2>Quicksetup</h2>
+  <p>Alternatively, you can use the <a href="quicksetup.php?userid=<?php print urlencode($details['ID']) ?>">quick setup</a> that will add a domain, website and set up the hosts and default email address in one step.</p>
 <?php
 }
 print_footer();

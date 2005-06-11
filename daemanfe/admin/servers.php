@@ -27,14 +27,14 @@ if (isset($_REQUEST['action'])) {
   }
 }
 
-$servers = execute("SELECT ID, Name, FullName, Address, Live, Updated, DNS, Mail, HTTP, DB, List, Shell, Radius FROM Servers ORDER BY Name;");
+$servers = execute("SELECT ID, Name, FullName, Address, Live, Updated, Date_Add(Updated, INTERVAL 1 DAY)<Now() As Old, DNS, Mail, HTTP, DB, List, Shell, Radius FROM Servers ORDER BY Name;");
 if ($servers) {
 ?>
   <table>
    <tr><th>Actions</th><th>Name</th><th>Full name</th><th>Address</th><th>Live</th><th>Last updated</th><th>Uses</th></tr>
 <?php
   for($row = 0; $row < count($servers); $row++) {
-    unset($uses);
+    $uses = array();
     if ($servers[$row]['DNS']) { $uses[] = "DNS"; }
     if ($servers[$row]['Mail']) { $uses[] = "Mail"; }
     if ($servers[$row]['HTTP']) { $uses[] = "HTTP"; }
@@ -42,7 +42,7 @@ if ($servers) {
     if ($servers[$row]['List']) { $uses[] = "List"; }
     if ($servers[$row]['Shell']) { $uses[] = "Shell"; }
     if ($servers[$row]['Radius']) { $uses[] = "Radius"; }
-    print " <tr><td><div class=action><a href=\"servers.php?action=editserver&amp;serverid=" . $servers[$row]['ID'] . "#serverform\">edit</a> <a href=\"servers.php?action=deleteserver&amp;serverid=" . $servers[$row]['ID']. "\">delete</a></div></td><td>" . htmlspecialchars($servers[$row]['Name']) . "</td><td>" . htmlspecialchars($servers[$row]['FullName']) . "</td><td>" . htmlspecialchars($servers[$row]['Address']) . "</td><td>" . iif($servers[$row]['Live'], "Yes", "No") . "</td><td>" . $servers[$row]['Updated'] . "</td><td>" . join(", ", $uses) . "</td></tr>\n";
+    print " <tr><td><div class=action><a href=\"servers.php?action=editserver&amp;serverid=" . $servers[$row]['ID'] . "#serverform\">edit</a> <a href=\"servers.php?action=deleteserver&amp;serverid=" . $servers[$row]['ID']. "\">delete</a> <a href=\"config.php?serverid=" . $servers[$row]['ID'] . "\">config</a></div></td><td>" . htmlspecialchars($servers[$row]['Name']) . "</td><td>" . htmlspecialchars($servers[$row]['FullName']) . "</td><td>" . htmlspecialchars($servers[$row]['Address']) . "</td><td>" . iif($servers[$row]['Live'], "Yes", "No") . "</td><td" . iif($servers[$row]['Old'], " class=\"error\"", "") . ">" . iif(mysql_to_date($servers[$row]['Updated']) == -1, "", $servers[$row]['Updated']) . "</td><td>" . join(", ", $uses) . "</td></tr>\n";
   }
 ?>
   </table>

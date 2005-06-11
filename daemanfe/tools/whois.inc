@@ -11,7 +11,6 @@ function lookup($domain, $server = "") {
   } else {
     $host = $server;
   }
-  flush();
 
   $whoisSocket = fsockopen($host, 43, $errno, $errstr, $timeout);
   if ($whoisSocket) {
@@ -56,6 +55,7 @@ function parse_whois($data) {
       if ($line == "Registrant's Address:") { $next = "registrant.address1"; }
       if ($line == "Registrant's Agent:") { $next = "agent.name"; }
       if (substr($line, 0, 10) == "Registrar:") { $info["agent.name"] = trim(substr($line, 10)); }
+      if (substr($line, 0, 21) == "Sponsoring Registrar:") { $info["agent.name"] = trim(substr($line, 21)); }
       if (substr($line, 0, 13) == "Whois Server:") { $info["agent.whois"] = trim(substr($line, 13)); }
       if (substr($line, 0, 4) == "URL:") { $info["agent.url"] = trim(substr($line, 4)); }
       if (substr($line, 0, 13) == "Referral URL:") { $info["agent.url"] = trim(substr($line, 13)); }

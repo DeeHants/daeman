@@ -37,9 +37,14 @@ for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
       fputs($configfile, "\tDocumentRoot /home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/\n");
       if ($website['Logging']) {
         fputs($configfile, "\tCustomLog /home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log combined\n");
+        fputs($configfile, "\tErrorLog /home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_error_log\n");
       } else {
         fputs($configfile, "\tCustomLog /dev/null combined\n");
+        fputs($configfile, "\tErrorLog /dev/null\n");
       }
+//      if ($website['CGI']) {
+        fputs($configfile, "\tScriptAlias /cgi-bin/ \"/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/cgi-bin/\"\n");
+//      }
 
       if (!file_exists("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "/")) {
         print "Creating website directory " . $website['Name'] . " for " . $website['UserName'] . "\n";
@@ -56,6 +61,13 @@ for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
           chown("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", $website['UserName']);
           chgrp("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_log", "apache");
         }
+        if (!file_exists("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_error_log")) {
+          print "Creating error log " . $website['Name'] . " for " . $website['UserName'] . "\n";
+          touch("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_error_log");
+          chmod("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_error_log", 0640);
+          chown("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_error_log", $website['UserName']);
+          chgrp("/home/" . $website['UserName'] . "/websites/" . $website['Name'] . "_error_log", "apache");
+        }
       }
 
     } else {
@@ -63,6 +75,7 @@ for ($websiteid = 0; $websiteid < mysql_num_rows($websites); $websiteid++) {
       if (substr($website['Redirect'], -1, 1) != "/") { $website['Redirect'] = $website['Redirect'] . "/"; }
 
       fputs($configfile, "\tCustomLog /dev/null combined\n");
+      fputs($configfile, "\tErrorLog /dev/null\n");
       fputs($configfile, "\tRewriteEngine On\n");
       fputs($configfile, "\tRewriteRule ^/(.*) " . $website['Redirect'] . "$1 [R]\n");
 

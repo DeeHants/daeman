@@ -18,7 +18,7 @@ if (isset($_REQUEST['action'])) {
     }
     $nextaccountid++;
 
-    if (execute("INSERT INTO Accounts (UserID, Name, RealName, AccountID) VALUES ('" . mysql_escape_string($details['ID']) . "', '" . mysql_escape_string($_REQUEST['name']) . "', '" . mysql_escape_string($_REQUEST['realname']) . "', '" . mysql_escape_string($nextaccountid) . "');")) {
+    if (execute("INSERT INTO Accounts (UserID, Name, RealName, Password, AccountID) VALUES ('" . mysql_escape_string($details['ID']) . "', '" . mysql_escape_string($_REQUEST['name']) . "', '" . mysql_escape_string($_REQUEST['realname']) . "', Encrypt('" . mysql_escape_string($_REQUEST['password']) . "', Concat('$1$', Round(Rand()*100000))), '" . mysql_escape_string($nextaccountid) . "');")) {
       print "   <p class=status>" . htmlspecialchars($_REQUEST['accountname']) . " successfully added.</p>";
     } else {
       print "   <p class=error>There was an error adding " . htmlspecialchars($_REQUEST['accountname']) . ".</p>";
@@ -38,10 +38,11 @@ if (isset($_REQUEST['action'])) {
   }
 }
 
-$accounts = execute("SELECT ID, Name, RealName FROM Accounts WHERE UserID='" . mysql_escape_string($details['ID']) . "';");
+$accounts = execute("SELECT ID, Name, RealName FROM Accounts WHERE UserID='" . mysql_escape_string($details['ID']) . "' ORDER BY Name;");
 
 if ($accounts) {
 ?>
+  <p>All mail accounts are prefixed with the user name (<?php print htmlspecialchars($details['Name']); ?>) followed by a "-". e.g. <?php print htmlspecialchars($details['Name'] . "-" . $accounts[0]['Name']); ?></p>
   <table>
    <tr><th>Actions</th><th>Name</th><th>Real name</th></tr>
 <?php
@@ -55,33 +56,34 @@ if ($accounts) {
   print "  <p>There are no accounts</p>\n";
 }
 
+$fill = array();
 if ($_REQUEST['action'] == "editaccount") {
   $account = execute("SELECT Name, RealName FROM Accounts WHERE ID = " . mysql_escape_string($_REQUEST['accountid']) . " ORDER BY Name;");
-?>
-  <form action="accounts.php" method="POST">
-   <input name="action" type="hidden" value="updateaccount">
-   <input name="userid" type="hidden" value="<?php print htmlspecialchars($details['ID']); ?>">
-   <input name="accountid" type="hidden" value="<?php print htmlspecialchars($_REQUEST['accountid']); ?>">
-   <table>
-    <tr><td>Account name</td><td><?php print htmlspecialchars($account[0]['Name']); ?></td></tr>
-    <tr><td>Real name</td><td><input name="realname" value="<?php print htmlspecialchars($account[0]['RealName']); ?>"></td></tr>
-    <tr><td colspan=2 align=center><input type="submit" value="Update account"></td></tr>
-   </table>
-  </form>
-<?php
-} else {
-?>
-  <form action="accounts.php" method="POST">
-   <input name="action" type="hidden" value="addaccount">
-   <input name="userid" type="hidden" value="<?php print htmlspecialchars($details['ID']); ?>">
-   <table>
-    <tr><td>Account name</td><td><input name="name"></td></tr>
-    <tr><td>Real name</td><td><input name="realname"></td></tr>
-    <tr><td colspan=2 align=center><input type="submit" value="Add new account"></td></tr>
-   </table>
-  </form>
-<?php
+  $fill['id'] = $_REQUEST['accountid'];
+  $fill['name'] = $account[0]['Name'];
+  $fill['realname'] = $account[0]['RealName'];
 }
+?>
+  <form action="accounts.php" method="POST">
+   <input name="action" type="hidden" value="<?php print iif(isset($fill['id']), "update", "add"); ?>account">
+   <input name="userid" type="hidden" value="<?php print htmlspecialchars($details['ID']); ?>">
+<?php if (isset($fill['id'])) { ?>
+   <input name="accountid" type="hidden" value="<?php print htmlspecialchars($fill['id']); ?>">
+<?php } ?>
+   <table>
+<?php if (isset($fill['id'])) { ?>
+    <tr><td>Account name</td><td><?php print htmlspecialchars($fill['name']); ?></td></tr>
+<?php } else { ?>
+    <tr><td>Account name</td><td><input name="name" value="<?php print htmlspecialchars($fill['name']); ?>"></td></tr>
+<?php } ?>
+    <tr><td>Real name</td><td><input name="realname" value="<?php print htmlspecialchars($fill['realname']); ?>"></td></tr>
+<?php if (!isset($fill['id'])) { ?>
+    <tr><td>Password</td><td><input name="password"></td></tr>
+<?php } ?>
+    <tr><td colspan=2 align=center><input type="submit" value="<?php print iif(isset($fill['id']), "Update", "Add"); ?> account"></td></tr>
+   </table>
+  </form>
+<?php
 
 print_footer();
 ?>
